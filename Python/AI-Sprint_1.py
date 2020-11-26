@@ -8,4 +8,12 @@ with open('steam.json', 'r') as json_file:
 def eersteNaam():
     print(f'De naam van het eerste spel is: {data[0]["name"]}')
 
+def gesorteerd():
+    namenlijst = []
+    for i in range(len(data)):
+        namenlijst.append(data[i]["name"])
+    return sorted(namenlijst)
+
 eersteNaam()
+print(gesorteerd())
+
