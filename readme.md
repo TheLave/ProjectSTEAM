@@ -1,7 +1,7 @@
 # Project STEAM
 
 ## Doel van dit project
-Het doel van het 'Project STEAM' is om gamers op het bekende platform [Steam]('https://store.steampowered.com/') een grafische weergave aan te bieden van het gaming gedrag van zichzelf en hun vrienden.
+Het doel van het 'Project STEAM' is om gamers op het bekende platform [Steam](https://store.steampowered.com/) een grafische weergave aan te bieden van het gaming gedrag van zichzelf en hun vrienden.
 
 ## Projectleden
 ### Jeroen Baltjes
