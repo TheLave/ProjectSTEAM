@@ -16,4 +16,3 @@ def gesorteerd(sortering, inverted):
 
 eersteNaam()
 print(gesorteerd('name', False))
-
