@@ -87,12 +87,15 @@ spellen_lijst = Listbox(master=frame,
                         font=('helvetica', 15,))
 
 scroll_bar = Scrollbar(frame)
+scroll_barx = Scrollbar(frame, orient=HORIZONTAL)
 
 spellen_lijst.config(yscrollcommand=scroll_bar.set)
 scroll_bar.config(command=spellen_lijst.yview)
-
+spellen_lijst.config(xscrollcommand=scroll_barx.set)
+scroll_barx.config(command=spellen_lijst.xview)
 
 scroll_bar.pack(side="right", fill=Y)
+scroll_barx.pack(side="bottom", fill='x')
 titel.pack(pady=40)
 eerstenaam_tonen.pack(pady=10)
 knop_eerstenaam.pack(pady=10)
