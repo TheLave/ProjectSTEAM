@@ -28,3 +28,8 @@ Studentnummer: 1786495
 GitHub Username: koen1508
 
 ## Applicatie instructies
+De applicatie bestaat uit het [Python bestand](https://github.com/TheLave/ProjectSTEAM/blob/main/Code%20Steam.py) en het [JSON bestand](https://github.com/TheLave/ProjectSTEAM/blob/main/steam.json). Het python bestand (Code_Steam.py) kan worden geopend vanuit PyCharm. Door op het groene play icoontje te klikken of door de keyboard shortcut `SHIFT + F10` in te drukken zal het script uitgevoerd worden.
+
+De applicatie bestaat uit het homescherm en 5 knoppen. De bovenste knop laat de naam van het eerste spel in het JSON bestand zien. De andere knoppen sorteren het gehele bestand respectievelijk (van boven naar beneden in de applicatie) op: appid, naam, prijs en datum.
+
+Er kan een regel aangeklikt worden om deze te highlighten. De applicatie heeft een verticale en horizontale scrollbar om de gehele regels te kunnen lezen. Elke regel bevat informatie over slechts één spel.
