@@ -66,13 +66,13 @@ def sorteren(zoekterm):
     """
     aantal_spellen = len(data)
 
-    spellen_lijst.delete(0, "end")
+    gesorteerde_weergave.delete(0, "end")
     gesorteerd = mergesort(data, zoekterm)
 
     spel_nummer = 0
 
     while spel_nummer < aantal_spellen:
-        spellen_lijst.insert("end", gesorteerd[spel_nummer])
+        gesorteerde_weergave.insert("end", gesorteerd[spel_nummer])
         spel_nummer += 1
 
 
@@ -133,21 +133,21 @@ knop_sorteren_op_datum = Button(master=root,
                                 font=("helvetica", 15, "bold"),
                                 command=lambda: sorteren("release_date"))
 
-spellen_lijst = Listbox(master=frame,
-                        background="darkblue",
-                        foreground="white",
-                        border=20,
-                        height=15,
-                        width=100,
-                        font=("helvetica", 15,))
+gesorteerde_weergave = Listbox(master=frame,
+                               background="darkblue",
+                               foreground="white",
+                               border=20,
+                               height=15,
+                               width=100,
+                               font=("helvetica", 15,))
 
 scroll_bar_y = Scrollbar(frame)
 scroll_bar_x = Scrollbar(frame, orient=HORIZONTAL)
 
-spellen_lijst.config(yscrollcommand=scroll_bar_y.set)
-scroll_bar_y.config(command=spellen_lijst.yview)
-spellen_lijst.config(xscrollcommand=scroll_bar_x.set)
-scroll_bar_x.config(command=spellen_lijst.xview)
+gesorteerde_weergave.config(yscrollcommand=scroll_bar_y.set)
+scroll_bar_y.config(command=gesorteerde_weergave.yview)
+gesorteerde_weergave.config(xscrollcommand=scroll_bar_x.set)
+scroll_bar_x.config(command=gesorteerde_weergave.xview)
 
 scroll_bar_y.pack(side="right", fill="y")
 scroll_bar_x.pack(side="bottom", fill="x")
@@ -159,6 +159,6 @@ knop_sorteren_op_naam.pack()
 knop_sorteren_op_prijs.pack()
 knop_sorteren_op_datum.pack()
 frame.pack()
-spellen_lijst.pack()
+gesorteerde_weergave.pack()
 
 root.mainloop()
