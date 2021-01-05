@@ -6,25 +6,36 @@ with open("steam.json", "r") as json_file:
 
 
 def programma_sluiten(event):
+    """
+    Sluit het programma af.
+    """
     root.destroy()
 
 
 def eerste_spel_tonen():
+    """
+    Toont in de GUI het eerste spel dat op Steam is gepubliceerd.
+    """
     eerste_spel = data[0]["name"]
 
     naam_eerste_spel.config(text=f'{eerste_spel}')
 
 
 def mergesort(lijst, zoekterm):
+    """
+    Sorteert volgens het mergesort algoritme de meegegeven lijst gebaseerd op de meegegeven zoekterm.
+    """
     if len(lijst) > 1:
         aantal_games = len(lijst)
         index_midden_lijst = aantal_games // 2
         linker_lijst = lijst[:index_midden_lijst]
         rechter_lijst = lijst[index_midden_lijst:]
 
+        # Splitsing van de lijst (Recursief, totdat de sublijsten 1 element bevatten).
         mergesort(linker_lijst, zoekterm)
         mergesort(rechter_lijst, zoekterm)
 
+        # Merge gedeelte van de functie.
         i = j = k = 0
 
         while i < len(linker_lijst) and j < len(rechter_lijst):
@@ -50,6 +61,9 @@ def mergesort(lijst, zoekterm):
 
 
 def sorteren(zoekterm):
+    """
+    Insert de gesorteerde lijst in de Listbox van de GUI.
+    """
     aantal_spellen = len(data)
 
     spellen_lijst.delete(0, "end")
