@@ -1,9 +1,7 @@
 import json
 from tkinter import *
 
-namenlijst_lengte = 1000
-
-with open('steam.json', 'r') as json_file:
+with open("steam.json", "r") as json_file:
     data = json.load(json_file)
 
 
@@ -11,25 +9,63 @@ def programma_sluiten(event):
     root.destroy()
 
 
-def eersteNaam():
-    naam_eerste_spel = data[0]["name"]
-    eerstenaam_tonen.config(text=f'{naam_eerste_spel}')
+def eerste_spel_tonen():
+    eerste_spel = data[0]["name"]
+
+    naam_eerste_spel.config(text=f'{eerste_spel}')
 
 
-def gesorteerd(sort):
-    spellen_lijst.delete(0, 'end')
-    gesorteerd = sorted(data[0:namenlijst_lengte], key=lambda i: i[sort])
+def mergesort(lijst, zoekterm):
+    if len(lijst) > 1:
+        aantal_games = len(lijst)
+        index_midden_lijst = aantal_games // 2
+        linker_lijst = lijst[:index_midden_lijst]
+        rechter_lijst = lijst[index_midden_lijst:]
+
+        mergesort(linker_lijst, zoekterm)
+        mergesort(rechter_lijst, zoekterm)
+
+        i = j = k = 0
+
+        while i < len(linker_lijst) and j < len(rechter_lijst):
+            if linker_lijst[i][zoekterm] < rechter_lijst[j][zoekterm]:
+                lijst[k] = linker_lijst[i]
+                i += 1
+            else:
+                lijst[k] = rechter_lijst[j]
+                j += 1
+            k += 1
+
+        while i < len(linker_lijst):
+            lijst[k] = linker_lijst[i]
+            i += 1
+            k += 1
+
+        while j < len(rechter_lijst):
+            lijst[k] = rechter_lijst[j]
+            j += 1
+            k += 1
+
+    return lijst
+
+
+def sorteren(zoekterm):
+    aantal_spellen = len(data)
+
+    spellen_lijst.delete(0, "end")
+    gesorteerd = mergesort(data, zoekterm)
+
     spel_nummer = 0
 
-    while spel_nummer < namenlijst_lengte:
-        spellen_lijst.insert(spel_nummer + 1, gesorteerd[spel_nummer])
+    while spel_nummer < aantal_spellen:
+        spellen_lijst.insert("end", gesorteerd[spel_nummer])
         spel_nummer += 1
 
 
 # GUI (Tkinter)
 root = Tk()
 
-root.bind('<Escape>', programma_sluiten)
+root.bind("<Escape>", programma_sluiten)
 
 root.attributes("-fullscreen", True)
 
@@ -43,45 +79,45 @@ titel = Label(master=root,
               text="Steamspellen",
               font=("helvetica", 50, "bold"))
 
-eerstenaam_tonen = Label(master=root,
+naam_eerste_spel = Label(master=root,
                          background="darkblue",
                          foreground="white",
                          font=("helvetica", 15, "bold"))
 
-knop_eerstenaam = Button(master=root,
-                         background="blue2",
-                         foreground="white",
-                         text="Laat eerste spel zien",
-                         font=("helvetica", 15, "bold"),
-                         command=eersteNaam)
+knop_eerste_spel = Button(master=root,
+                          background="blue2",
+                          foreground="white",
+                          text="Laat eerste spel zien",
+                          font=("helvetica", 15, "bold"),
+                          command=eerste_spel_tonen)
 
-knop_gesorteerd_appid = Button(master=root,
-                               background="blue2",
-                               foreground="white",
-                               text="Sorteer spellen op appid",
-                               font=("helvetica", 15, "bold"),
-                               command=lambda: gesorteerd("appid"))
+knop_sorteren_op_appid = Button(master=root,
+                                background="blue2",
+                                foreground="white",
+                                text="Sorteer spellen op appid",
+                                font=("helvetica", 15, "bold"),
+                                command=lambda: sorteren("appid"))
 
-knop_gesorteerd_naam =  Button(master=root,
+knop_sorteren_op_naam = Button(master=root,
                                background="blue2",
                                foreground="white",
                                text="Sorteer spellen op naam",
                                font=("helvetica", 15, "bold"),
-                               command=lambda: gesorteerd("name"))
+                               command=lambda: sorteren("name"))
 
-knop_gesorteerd_prijs = Button(master=root,
-                               background="blue2",
-                               foreground="white",
-                               text="Sorteer spellen op prijs",
-                               font=("helvetica", 15, "bold"),
-                               command=lambda: gesorteerd("price"))
+knop_sorteren_op_prijs = Button(master=root,
+                                background="blue2",
+                                foreground="white",
+                                text="Sorteer spellen op prijs",
+                                font=("helvetica", 15, "bold"),
+                                command=lambda: sorteren("price"))
 
-knop_gesorteerd_datum = Button(master=root,
-                               background="blue2",
-                               foreground="white",
-                               text="Sorteer spellen op datum",
-                               font=("helvetica", 15, "bold"),
-                               command=lambda: gesorteerd("release_date"))
+knop_sorteren_op_datum = Button(master=root,
+                                background="blue2",
+                                foreground="white",
+                                text="Sorteer spellen op datum",
+                                font=("helvetica", 15, "bold"),
+                                command=lambda: sorteren("release_date"))
 
 spellen_lijst = Listbox(master=frame,
                         background="darkblue",
@@ -102,14 +138,13 @@ scroll_bar_x.config(command=spellen_lijst.xview)
 scroll_bar_y.pack(side="right", fill="y")
 scroll_bar_x.pack(side="bottom", fill="x")
 titel.pack(pady=40)
-eerstenaam_tonen.pack(pady=10)
-knop_eerstenaam.pack(pady=10)
-knop_gesorteerd_appid.pack()
-knop_gesorteerd_naam.pack()
-knop_gesorteerd_prijs.pack()
-knop_gesorteerd_datum.pack()
+naam_eerste_spel.pack(pady=10)
+knop_eerste_spel.pack(pady=10)
+knop_sorteren_op_appid.pack()
+knop_sorteren_op_naam.pack()
+knop_sorteren_op_prijs.pack()
+knop_sorteren_op_datum.pack()
 frame.pack()
 spellen_lijst.pack()
 
 root.mainloop()
-
