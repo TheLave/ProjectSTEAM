@@ -72,7 +72,8 @@ def sorteren(zoekterm):
     spel_nummer = 0
 
     while spel_nummer < aantal_spellen:
-        gesorteerde_weergave.insert("end", gesorteerd[spel_nummer])
+        gesorteerde_weergave.insert("end", "naam: {:<80} appid:{:<} prijs:${:<} datum van uitgave:{:<}".format(gesorteerd[spel_nummer]['name'],
+                gesorteerd[spel_nummer]['appid'],gesorteerd[spel_nummer]['price'], gesorteerd[spel_nummer]['release_date'] ))
         spel_nummer += 1
 
 
