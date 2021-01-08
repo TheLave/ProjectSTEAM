@@ -129,9 +129,26 @@ class SteamGUI:
         frame_knop3 = Frame(master=hoofdframe,
                             background="yellow")
 
-        #TEST AREA
-        # menu = Menu(master=master)
-        # menu2 = Menubutton(master=master)
+
+        # To do:
+        # - Dropdown menu for Sort by
+                # Release Date (misschien ook inverted, dus van nieuw-oud)
+                # Name (misschien ook inverted, dus van z-a)
+                # Lowest Price
+                # Highest Price
+                # User Reviews (= rating, zie rating system & en misschien ook inverted)
+        # - Scale for maximum price
+        # - Scale for minimum price
+        # - Scale for required_age
+        # - Check buttons for platforms
+        # - Check buttons for steamspy_tags
+        # - Check buttons for genres
+        # - Check button for language "English"
+        # - Rating system
+                # Ratingspercentage berekenen door (positive_ratings / negative_ratings) * 100
+                # Ratingspercentage koppelen aan rating (Overwhelmingly positive, Positive, Mixed, Mostly Negative, etc...
+                    # https://www.gamasutra.com/blogs/LarsDoucet/20141006/227162/Fixing_Steams_User_Rating_Charts.php#:~:text=94%20-%2080%25%20%3A%20Very%20Positive,40%20-%2069%25%20%3A%20Mixed
+                # Rating weergeven bij zoeken van games
 
 
 def json_bestand_inlezen():
