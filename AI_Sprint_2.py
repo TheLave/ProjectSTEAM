@@ -76,7 +76,16 @@ def sorteren(zoekterm):
                 gesorteerd[spel_nummer]['appid'],gesorteerd[spel_nummer]['price'], gesorteerd[spel_nummer]['release_date'] ))
         spel_nummer += 1
 
-
+def zoek_balk():
+    """
+    Een functie om naar een specifiek items in de JSON lijst te zoeken
+    """
+    target = target_entry.get()
+    for i in range(len(data)):
+        if target.lower() in data[i]['name'].lower():
+          gesorteerde_weergave.insert("end", "naam: {:35} appid:{:<5} prijs: ${:<10} datum van uitgave: {:}".format(data[i]['name'],
+                    data[i]['appid'],data[i]['price'], data[i]['release_date'] ))
+        
 # GUI (Tkinter)
 root = Tk()
 
@@ -87,6 +96,26 @@ root.attributes("-fullscreen", True)
 root.configure(background="darkblue")
 
 frame = Frame(master=root)
+
+titel = Label(master=root,
+              background="darkblue",
+              foreground="white",
+              text="Steamspellen",
+              font=("helvetica", 50, "bold"))
+
+
+
+zoek_balk_knop = Button(master=root,
+                        text="zoeken",
+                        command= zoek_balk)
+
+target_entry = Entry(master=root)
+
+zoek_balk_knop.pack()
+target_entry.pack()
+
+
+
 
 titel = Label(master=root,
               background="darkblue",
