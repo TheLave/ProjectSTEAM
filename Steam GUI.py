@@ -159,7 +159,7 @@ class SteamGUI:
         frame_store_producten = Frame(master=frame_store,
                                       background="#1b2837")
         frame_store_producten.pack(side=LEFT,
-                                   padx=(400, 10))
+                                   padx=(250, 10))
 
         frame_zoekbalk_producten = Frame(master=frame_store_producten,
                                          background="#101822")
