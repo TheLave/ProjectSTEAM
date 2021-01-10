@@ -60,13 +60,13 @@ class SteamGUI:
             zoekterm = entry_zoekbalk_producten.get()
             maximum_lengte_naam = 40
 
-            for product in range(len(data)):
-                if zoekterm.lower() in data[product]['name'].lower():
+            for product in data:
+                if zoekterm.lower() in product['name'].lower():
                     listbox_producten.insert("end",
-                                             f" {data[product]['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
-                                             f"{data[product]['release_date']:>16}"
-                                             f"{data[product]['rating']:>29}"
-                                             f"{data[product]['price']:>12.2f}")
+                                             f" {product['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
+                                             f"{product['release_date']:>16}"
+                                             f"{product['rating']:>29}"
+                                             f"{product['price']:>12.2f}")
 
         def store_scherm_tonen():
             knop_store.button.configure(foreground="white")
