@@ -266,10 +266,12 @@ def merge_sort(lijst, zoekterm):
     """
     Returnt een gesorteerde lijst van de meegegeven lijst, gesorteert volgens het merge sort algoritme gebaseerd op de meegegeven zoekterm.
     """
-    if len(lijst) > 1:
-        index_midden_lijst = len(lijst) // 2
-        linker_lijst = lijst[:index_midden_lijst]
-        rechter_lijst = lijst[index_midden_lijst:]
+    gesorteerde_lijst = lijst.copy()
+
+    if len(gesorteerde_lijst) > 1:
+        index_midden_lijst = len(gesorteerde_lijst) // 2
+        linker_lijst = gesorteerde_lijst[:index_midden_lijst]
+        rechter_lijst = gesorteerde_lijst[index_midden_lijst:]
 
         # Splitsing van de lijst (Recursief, totdat de sublijsten 1 element bevatten).
         merge_sort(linker_lijst, zoekterm)
@@ -280,24 +282,24 @@ def merge_sort(lijst, zoekterm):
 
         while i < len(linker_lijst) and j < len(rechter_lijst):
             if linker_lijst[i][zoekterm] < rechter_lijst[j][zoekterm]:
-                lijst[k] = linker_lijst[i]
+                gesorteerde_lijst[k] = linker_lijst[i]
                 i += 1
             else:
-                lijst[k] = rechter_lijst[j]
+                gesorteerde_lijst[k] = rechter_lijst[j]
                 j += 1
             k += 1
 
         while i < len(linker_lijst):
-            lijst[k] = linker_lijst[i]
+            gesorteerde_lijst[k] = linker_lijst[i]
             i += 1
             k += 1
 
         while j < len(rechter_lijst):
-            lijst[k] = rechter_lijst[j]
+            gesorteerde_lijst[k] = rechter_lijst[j]
             j += 1
             k += 1
 
-    return lijst
+    return gesorteerde_lijst
 
 
 def lijst_omkeren(lijst):
