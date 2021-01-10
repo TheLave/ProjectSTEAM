@@ -47,8 +47,9 @@ class CheckKnopStoreOpties:
 
 
 class SteamGUI:
-    def __init__(self, master):
-        data = json_bestand_inlezen()
+    def __init__(self, master, data):
+        def programma_afsluiten(event):
+            master.destroy()
 
         def product_zoeken():
             """
@@ -59,12 +60,13 @@ class SteamGUI:
             zoekterm = entry_zoekbalk_producten.get()
             maximum_lengte_naam = 40
 
-            for game in range(len(data)):
-                if zoekterm.lower() in data[game]['name'].lower():
+            for product in range(len(data)):
+                if zoekterm.lower() in data[product]['name'].lower():
                     listbox_producten.insert("end",
-                                             f"{data[game]['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}    "
-                                             f"{data[game]['release_date']:<14}"
-                                             f"{data[game]['price']:>7.2f}")
+                                             f" {data[product]['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
+                                             f"{data[product]['release_date']:>16}"
+                                             f"{data[product]['rating']:>29}"
+                                             f"{data[product]['price']:>12.2f}")
 
         def store_scherm_tonen():
             knop_store.button.configure(foreground="white")
@@ -77,6 +79,17 @@ class SteamGUI:
             frame_knop3.forget()
             frame_store.pack(fill=BOTH,
                              expand=TRUE)
+
+            listbox_producten.delete(0, "end")
+            gesorteerde_lijst_op_rating = lijst_omkeren(merge_sort(data, "rating_percentage"))
+            maximum_lengte_naam = 40
+
+            for product in gesorteerde_lijst_op_rating:
+                listbox_producten.insert("end",
+                                         f" {product['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
+                                         f"{product['release_date']:>16}"
+                                         f"{product['rating']:>29}"
+                                         f"{product['price']:>12.2f}")
 
         def knop_1_scherm_tonen():
             knop1.button.configure(foreground="white")
@@ -117,7 +130,7 @@ class SteamGUI:
 
 # Configs
         master.title("Steam")
-        master.bind("<Escape>", master.destroy)
+        master.bind("<Escape>", programma_afsluiten)
         master.attributes("-fullscreen", True)
 
 # Widgets
@@ -128,7 +141,7 @@ class SteamGUI:
 
         # Menubalk1
         frame_menubalk1 = FrameMenubalk(hoofdframe)
-        knop_programma_sluiten = KnopMenubalk1(frame_menubalk1.frame, "x", master.quit)
+        knop_programma_sluiten = KnopMenubalk1(frame_menubalk1.frame, "x", master.destroy)
         knop_programma_minimaliseren = KnopMenubalk1(frame_menubalk1.frame, "-", master.iconify)
 
         # Menubalk2
@@ -146,7 +159,7 @@ class SteamGUI:
         frame_store_producten = Frame(master=frame_store,
                                       background="#1b2837")
         frame_store_producten.pack(side=LEFT,
-                                   padx=(450, 10))
+                                   padx=(400, 10))
 
         frame_zoekbalk_producten = Frame(master=frame_store_producten,
                                          background="#101822")
@@ -189,7 +202,7 @@ class SteamGUI:
                                     background="#1b2837",
                                     border=0,
                                     height=48,
-                                    width=80,
+                                    width=99,
                                     font=("monaco", 12))
         listbox_producten.pack(padx=20)
 
@@ -209,36 +222,49 @@ class SteamGUI:
         frame_knop3 = Frame(master=hoofdframe,
                             background="yellow")
 
-        # To do:
-        # Zorgen dat listbox bij default alle games heeft (bij voorkeur gesorteerd op rating)
-        # - Dropdown menu for Sort by
-                # Release Date (misschien ook inverted, dus van nieuw-oud)
-                # Name (misschien ook inverted, dus van z-a)
-                # Lowest Price
-                # Highest Price
-                # User Reviews (= rating, zie rating system & en misschien ook inverted)
-        # - Scale for maximum price
-        # - Scale for minimum price
-        # - Scale for required_age
-        # - Check buttons for platforms
-        # - Check buttons for steamspy_tags
-        # - Check buttons for genres
-        # - Check button for language "English"
-        # - Rating system
-                # Ratingspercentage berekenen door (positive_ratings / negative_ratings) * 100
-                # Ratingspercentage koppelen aan rating (Overwhelmingly positive, Positive, Mixed, Mostly Negative, etc...
-                    # https://www.gamasutra.com/blogs/LarsDoucet/20141006/227162/Fixing_Steams_User_Rating_Charts.php#:~:text=94%20-%2080%25%20%3A%20Very%20Positive,40%20-%2069%25%20%3A%20Mixed
-                # Rating weergeven bij zoeken van games
-
 
 def json_bestand_inlezen():
     with open("steam.json", "r") as json_file:
         return json.load(json_file)
 
 
-def mergesort(lijst, zoekterm):
+def rating_en_rating_percentage_toevoegen_aan_data(data):
+    i = 0
+
+    for product in data:
+        aantal_ratings = product["positive_ratings"] + product["negative_ratings"]
+
+        if aantal_ratings != 0:
+            rating_percentage = round((product["positive_ratings"] / aantal_ratings) * 100)
+        else:
+            rating_percentage = 0
+
+        if 95 <= rating_percentage <= 100:
+            rating = "Overwhelmingly Positive"
+        elif 90 <= rating_percentage <= 94:
+            rating = "Very Positive"
+        elif 80 <= rating_percentage <= 89:
+            rating = "Positive"
+        elif 70 <= rating_percentage <= 79:
+            rating = "Mostly Positive"
+        elif 40 <= rating_percentage <= 69:
+            rating = "Mixed"
+        elif 30 <= rating_percentage <= 39:
+            rating = "Mostly Negative"
+        elif 20 <= rating_percentage <= 29:
+            rating = "Negative"
+        elif 10 <= rating_percentage <= 19:
+            rating = "Very Negative"
+        elif 0 <= rating_percentage <= 9:
+            rating = "Overwhelmingly Negative"
+
+        data[i].update({"rating_percentage": rating_percentage, "rating": rating})
+        i += 1
+
+
+def merge_sort(lijst, zoekterm):
     """
-    Sorteert volgens het mergesort algoritme de meegegeven lijst gebaseerd op de meegegeven zoekterm.
+    Returnt een gesorteerde lijst van de meegegeven lijst, gesorteert volgens het merge sort algoritme gebaseerd op de meegegeven zoekterm.
     """
     if len(lijst) > 1:
         index_midden_lijst = len(lijst) // 2
@@ -246,8 +272,8 @@ def mergesort(lijst, zoekterm):
         rechter_lijst = lijst[index_midden_lijst:]
 
         # Splitsing van de lijst (Recursief, totdat de sublijsten 1 element bevatten).
-        mergesort(linker_lijst, zoekterm)
-        mergesort(rechter_lijst, zoekterm)
+        merge_sort(linker_lijst, zoekterm)
+        merge_sort(rechter_lijst, zoekterm)
 
         # Merge gedeelte van de functie.
         i = j = k = 0
@@ -274,11 +300,47 @@ def mergesort(lijst, zoekterm):
     return lijst
 
 
+def lijst_omkeren(lijst):
+    """
+    Returnt het omgekeerde van de gegeven lijst.
+    """
+    omgekeerde_lijst = []
+    laatste_index_lijst = len(lijst) - 1
+
+    for i in range(laatste_index_lijst, -1, -1):
+        omgekeerde_lijst.append(lijst[i])
+
+    return omgekeerde_lijst
+
+
 def main():
+    data = json_bestand_inlezen()
+    rating_en_rating_percentage_toevoegen_aan_data(data)
+
     root = Tk()
-    steam_gui = SteamGUI(root)
+    steam_gui = SteamGUI(root, data)
     root.mainloop()
 
 
 if __name__ == "__main__":
     main()
+
+# To do:
+        # Zorgen dat listbox bij default alle producten weergeeft (bij voorkeur gesorteerd op rating)
+        # - Dropdown menu for Sort by
+                # Release Date (misschien ook inverted, dus van nieuw-oud)
+                # Name (misschien ook inverted, dus van z-a)
+                # Lowest Price
+                # Highest Price
+                # User Reviews (= rating, zie rating system & en misschien ook inverted)
+        # - Scale for maximum price
+        # - Scale for minimum price
+        # - Scale for required_age
+        # - Check buttons for platforms
+        # - Check buttons for steamspy_tags
+        # - Check buttons for genres
+        # - Check button for language "English"
+        # - Rating system                                                                                                                                DONE
+                # Functie schrijven om ratingspercentage van producten toe te voegen aan de data                                                         DONE
+                # ratingspercentage koppelen aan rating en toevoegen aan data(Overwhelmingly positive, Positive, Mixed, Mostly Negative, etc...          DONE
+                # Rating weergeven bij zoeken van producten                                                                                              DONE
