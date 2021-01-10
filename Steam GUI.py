@@ -47,7 +47,9 @@ class CheckKnopStoreOpties:
 
 
 class SteamGUI:
-    def __init__(self, master, data):
+    def __init__(self, master):
+        data = json_bestand_inlezen()
+
         def product_zoeken():
             """
             Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm.
@@ -65,7 +67,7 @@ class SteamGUI:
                                              f"{data[game]['price']:>7.2f}")
 
         def store_scherm_tonen():
-            knop_store.button.configure(foreground="#FFFFFF")
+            knop_store.button.configure(foreground="white")
             knop1.button.configure(foreground="#a1aab8")
             knop2.button.configure(foreground="#a1aab8")
             knop3.button.configure(foreground="#a1aab8")
@@ -77,7 +79,7 @@ class SteamGUI:
                              expand=TRUE)
 
         def knop_1_scherm_tonen():
-            knop1.button.configure(foreground="#FFFFFF")
+            knop1.button.configure(foreground="white")
             knop2.button.configure(foreground="#a1aab8")
             knop3.button.configure(foreground="#a1aab8")
             knop_store.button.configure(foreground="#a1aab8")
@@ -89,7 +91,7 @@ class SteamGUI:
                              expand=TRUE)
 
         def knop_2_scherm_tonen():
-            knop2.button.configure(foreground="#FFFFFF")
+            knop2.button.configure(foreground="white")
             knop1.button.configure(foreground="#a1aab8")
             knop3.button.configure(foreground="#a1aab8")
             knop_store.button.configure(foreground="#a1aab8")
@@ -101,7 +103,7 @@ class SteamGUI:
                              expand=TRUE)
 
         def knop_3_scherm_tonen():
-            knop3.button.configure(foreground="#FFFFFF")
+            knop3.button.configure(foreground="white")
             knop1.button.configure(foreground="#a1aab8")
             knop2.button.configure(foreground="#a1aab8")
             knop_store.button.configure(foreground="#a1aab8")
@@ -152,7 +154,7 @@ class SteamGUI:
                                       pady=10)
 
         entry_zoekbalk_producten = Entry(master=frame_zoekbalk_producten,
-                                         foreground="#FFFFFF",
+                                         foreground="white",
                                          background="#213a4a",
                                          width=30,
                                          font=("helvetica", 14))
@@ -162,7 +164,7 @@ class SteamGUI:
 
         knop_zoekbalk_producten = Button(master=frame_zoekbalk_producten,
                                          foreground="#63cde8",
-                                         activeforeground="#FFFFFF",
+                                         activeforeground="white",
                                          background="#213a4a",
                                          activebackground="#4685a7",
                                          width=8,
@@ -170,9 +172,6 @@ class SteamGUI:
                                          font=("helvetica", 10, "bold"),
                                          command=product_zoeken)
         knop_zoekbalk_producten.pack(side=LEFT)
-
-        # knop_show_all = Button(...)
-        # knop_show_all.pack()
 
         label_sort_by = Label(master=frame_zoekbalk_producten,
                               foreground="#2f475e",
@@ -276,10 +275,8 @@ def mergesort(lijst, zoekterm):
 
 
 def main():
-    data = json_bestand_inlezen()
-
     root = Tk()
-    steam_gui = SteamGUI(root, data)
+    steam_gui = SteamGUI(root)
     root.mainloop()
 
 
