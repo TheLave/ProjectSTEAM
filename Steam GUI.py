@@ -48,25 +48,67 @@ class CheckKnopStoreOpties:
 
 class SteamGUI:
     def __init__(self, master, data):
+        lijst_temp = []
+
         def programma_afsluiten(event):
             master.destroy()
 
-        def product_zoeken():
+        def producten_zoeken_op_naam():
             """
-            Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm.
+            Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm en returnt een lijst hiervan.
             """
-            listbox_producten.delete(0, "end")
-
+            lijst = []
+            lijst_temp.clear()
             zoekterm = entry_zoekbalk_producten.get()
-            maximum_lengte_naam = 40
 
             for product in data:
                 if zoekterm.lower() in product['name'].lower():
-                    listbox_producten.insert("end",
-                                             f" {product['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
-                                             f"{product['release_date']:>16}"
-                                             f"{product['rating']:>29}"
-                                             f"{product['price']:>12.2f}")
+                    lijst.append(product)
+                    lijst_temp.append(product)
+
+            return lijst
+
+        def lijst_sorteren_op_optie(lijst, opties, waarde):
+            sortering = waarde.get()
+
+            if sortering == opties[0] or sortering == opties[1]:
+                zoekterm = "release_date"
+            elif sortering == opties[2] or sortering == opties[3]:
+                zoekterm = "name"
+            elif sortering == opties[4] or sortering == opties[5]:
+                zoekterm = "price"
+            elif sortering == opties[6] or sortering == opties[7]:
+                zoekterm = "rating_percentage"
+
+            lijst = merge_sort(lijst, zoekterm)
+            lijst_omgekeerde_sortering = [opties[0], opties[3], opties[5], opties[6]]
+
+            if sortering in lijst_omgekeerde_sortering:
+                lijst = lijst_omkeren(lijst)
+
+            return lijst
+
+        def inhoud_listbox_aanpassen(lijst):
+            listbox_producten.delete(0, "end")
+
+            maximum_lengte_naam = 40
+
+            for product in lijst:
+                listbox_producten.insert("end",
+                                         f" {product['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
+                                         f"{product['release_date']:>16}"
+                                         f"{product['rating']:>29}"
+                                         f"{product['price']:>11.2f}"
+                                         f"€")
+
+        def weergegeven_producten_sorteren(opties, waarde):
+            lijst = lijst_sorteren_op_optie(lijst_temp, opties, waarde)
+            inhoud_listbox_aanpassen(lijst)
+
+        def producten_weergeven(opties, waarde):
+            lijst = producten_zoeken_op_naam()
+            lijst = lijst_sorteren_op_optie(lijst, opties, waarde)
+            inhoud_listbox_aanpassen(lijst)
 
         def store_scherm_tonen():
             knop_store.button.configure(foreground="white")
@@ -80,16 +122,9 @@ class SteamGUI:
             frame_store.pack(fill=BOTH,
                              expand=TRUE)
 
-            listbox_producten.delete(0, "end")
-            gesorteerde_lijst_op_rating = lijst_omkeren(merge_sort(data, "rating_percentage"))
-            maximum_lengte_naam = 40
+            entry_zoekbalk_producten.delete(0, "end")
 
-            for product in gesorteerde_lijst_op_rating:
-                listbox_producten.insert("end",
-                                         f" {product['name'][:maximum_lengte_naam]:{maximum_lengte_naam}}"
-                                         f"{product['release_date']:>16}"
-                                         f"{product['rating']:>29}"
-                                         f"{product['price']:>12.2f}")
+            producten_weergeven(sort_by_opties, sort_by_optionmenu_waarde)
 
         def knop_1_scherm_tonen():
             knop1.button.configure(foreground="white")
@@ -127,13 +162,12 @@ class SteamGUI:
             frame_knop3.pack(fill=BOTH,
                              expand=TRUE)
 
-
-# Configs
+        # Configs
         master.title("Steam")
         master.bind("<Escape>", programma_afsluiten)
         master.attributes("-fullscreen", True)
 
-# Widgets
+        # Widgets
         hoofdframe = Frame(master=master,
                            background="#1b2837")
         hoofdframe.pack(fill=BOTH,
@@ -151,7 +185,7 @@ class SteamGUI:
         knop2 = KnopMenubalk2(frame_menubalk2.frame, "KNOP2", knop_2_scherm_tonen)
         knop3 = KnopMenubalk2(frame_menubalk2.frame, "KNOP3", knop_3_scherm_tonen)
 
-    # Schermen
+        # Schermen
         # Store scherm
         frame_store = Frame(master=hoofdframe,
                             background="#1b2837")
@@ -159,7 +193,7 @@ class SteamGUI:
         frame_store_producten = Frame(master=frame_store,
                                       background="#1b2837")
         frame_store_producten.pack(side=LEFT,
-                                   padx=(250, 10))
+                                   padx=(240, 10))
 
         frame_zoekbalk_producten = Frame(master=frame_store_producten,
                                          background="#101822")
@@ -183,7 +217,7 @@ class SteamGUI:
                                          width=8,
                                          text="Search",
                                          font=("helvetica", 10, "bold"),
-                                         command=product_zoeken)
+                                         command=lambda: producten_weergeven(sort_by_opties, sort_by_optionmenu_waarde))
         knop_zoekbalk_producten.pack(side=LEFT)
 
         label_sort_by = Label(master=frame_zoekbalk_producten,
@@ -191,20 +225,55 @@ class SteamGUI:
                               background="#101822",
                               text="Sort by",
                               font=("helvetica", 10))
-        label_sort_by.pack(side=RIGHT,
-                           padx=(100, 10))
+        label_sort_by.pack(side=LEFT,
+                           padx=(335, 0))
 
-        # menu_sort_by = ...
-        # menu_sort_by.pack()
+        sort_by_opties = ["Release Date New",
+                          "Release Date Old",
+                          "Name A-Z",
+                          "Name Z-A",
+                          "Lowest Price",
+                          "Highest Price",
+                          "User Reviews Positive",
+                          "User Reviews Negative"]
 
-        listbox_producten = Listbox(master=frame_store_producten,
+        sort_by_optionmenu_waarde = StringVar()
+        sort_by_optionmenu_waarde.set(sort_by_opties[0])
+
+        optionmenu_sort_by = OptionMenu(frame_zoekbalk_producten,
+                                        sort_by_optionmenu_waarde,
+                                        *sort_by_opties)
+        optionmenu_sort_by.configure(foreground="#63cde8",
+                                     activeforeground="white",
+                                     background="#213a4a",
+                                     activebackground="#4685a7",
+                                     font=("helvetica", 10, "bold"),
+                                     width=21,
+                                     highlightthickness=0)
+        optionmenu_sort_by.pack(side=LEFT,
+                                padx=10)
+
+        sort_by_optionmenu_waarde.trace("w", lambda i, j, k: weergegeven_producten_sorteren(sort_by_opties, sort_by_optionmenu_waarde))
+
+        frame_listbox_producten = Frame(master=frame_store_producten,
+                                        background="#1b2837")
+        frame_listbox_producten.pack()
+
+        listbox_producten = Listbox(master=frame_listbox_producten,
                                     foreground="#a1aab8",
-                                    background="#1b2837",
-                                    border=0,
+                                    background="#16202d",
+                                    selectbackground="#101821",
                                     height=48,
                                     width=99,
                                     font=("monaco", 12))
-        listbox_producten.pack(padx=20)
+        listbox_producten.pack(side=LEFT)
+
+        scroll_bar_y_listbox_producten = Scrollbar(master=frame_listbox_producten,
+                                                   command=listbox_producten.yview)
+        scroll_bar_y_listbox_producten.pack(side=RIGHT,
+                                            fill=Y)
+
+        listbox_producten.configure(yscrollcommand=scroll_bar_y_listbox_producten.set)
 
         frame_store_opties = Frame(master=frame_store,
                                    background="#1b2837")
@@ -221,6 +290,9 @@ class SteamGUI:
         # Knop3 scherm
         frame_knop3 = Frame(master=hoofdframe,
                             background="yellow")
+
+        # Store tonen bij opstarten van het programma.
+        store_scherm_tonen()
 
 
 def json_bestand_inlezen():
@@ -266,12 +338,10 @@ def merge_sort(lijst, zoekterm):
     """
     Returnt een gesorteerde lijst van de meegegeven lijst, gesorteert volgens het merge sort algoritme gebaseerd op de meegegeven zoekterm.
     """
-    gesorteerde_lijst = lijst.copy()
-
-    if len(gesorteerde_lijst) > 1:
-        index_midden_lijst = len(gesorteerde_lijst) // 2
-        linker_lijst = gesorteerde_lijst[:index_midden_lijst]
-        rechter_lijst = gesorteerde_lijst[index_midden_lijst:]
+    if len(lijst) > 1:
+        index_midden_lijst = len(lijst) // 2
+        linker_lijst = lijst[:index_midden_lijst]
+        rechter_lijst = lijst[index_midden_lijst:]
 
         # Splitsing van de lijst (Recursief, totdat de sublijsten 1 element bevatten).
         merge_sort(linker_lijst, zoekterm)
@@ -282,24 +352,24 @@ def merge_sort(lijst, zoekterm):
 
         while i < len(linker_lijst) and j < len(rechter_lijst):
             if linker_lijst[i][zoekterm] < rechter_lijst[j][zoekterm]:
-                gesorteerde_lijst[k] = linker_lijst[i]
+                lijst[k] = linker_lijst[i]
                 i += 1
             else:
-                gesorteerde_lijst[k] = rechter_lijst[j]
+                lijst[k] = rechter_lijst[j]
                 j += 1
             k += 1
 
         while i < len(linker_lijst):
-            gesorteerde_lijst[k] = linker_lijst[i]
+            lijst[k] = linker_lijst[i]
             i += 1
             k += 1
 
         while j < len(rechter_lijst):
-            gesorteerde_lijst[k] = rechter_lijst[j]
+            lijst[k] = rechter_lijst[j]
             j += 1
             k += 1
 
-    return gesorteerde_lijst
+    return lijst
 
 
 def lijst_omkeren(lijst):
