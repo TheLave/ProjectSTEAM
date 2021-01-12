@@ -398,16 +398,8 @@ if __name__ == "__main__":
     main()
 
 # To do:
-        # Zorgen dat listbox bij default alle producten weergeeft gesorteerd op rating                                                                  DONE
-        # - Dropdown menu for Sort by
-                # Release Date New
-                # Release Date Old
-                # Name A-Z
-                # Name Z-A
-                # Lowest Price
-                # Highest Price
-                # User Reviews Positive
-                # User Reviews Negative
+        # Zorgen dat listbox bij default alle producten weergeeft gesorteerd op rating                                                                   DONE
+        # - Dropdown menu for Sort by                                                                                                                    DONE
         # - Scale for maximum price
         # - Scale for minimum price
         # - Scale for required_age
