@@ -1,6 +1,7 @@
 from tkinter import *
 import json
 
+
 class DataBewerking:
     @staticmethod
     def json_bestand_inlezen():
@@ -136,19 +137,30 @@ class Sorteren:
 
 class SteamGUI:
     def __init__(self, master, data):
+        # Kleurencodes
+        navy = "#101822"
+        donkerblauw = "#16202d"
+        blauw = "#1b2837"
+        blauw2 = "#213a4a"
+        lichtblauw = "#4685a7"
+        babyblauw = "#63cde8"
+        donkergrijs = "#202224"
+        lichtgrijs = "#a1aab8"
+        grijs = "#323e4b"
+
         class FrameMenubalk:
             def __init__(self, master):
                 self.frame = Frame(master=master,
-                                   background="#202224")
+                                   background=donkergrijs)
                 self.frame.pack(fill=X)
 
         class KnopMenubalk1:
             def __init__(self, master, text, command):
                 self.button = Button(master=master,
-                                     foreground="#a1aab8",
-                                     activeforeground="#c4ccd8",
-                                     background="#202224",
-                                     activebackground="#202224",
+                                     foreground=lichtgrijs,
+                                     activeforeground="white",
+                                     background=donkergrijs,
+                                     activebackground=donkergrijs,
                                      borderwidth=0,
                                      text=text,
                                      font=("helvetica", 12, "bold"),
@@ -159,10 +171,10 @@ class SteamGUI:
         class KnopMenubalk2:
             def __init__(self, master, text, command):
                 self.button = Button(master=master,
-                                     foreground="#a1aab8",
-                                     activeforeground="#c4ccd8",
-                                     background="#202224",
-                                     activebackground="#202224",
+                                     foreground=lichtgrijs,
+                                     activeforeground="white",
+                                     background=donkergrijs,
+                                     activebackground=donkergrijs,
                                      borderwidth=0,
                                      text=text,
                                      font=("helvetica", 18),
@@ -175,7 +187,7 @@ class SteamGUI:
         class FrameFilter:
             def __init__(self, master):
                 self.frame = Frame(master=master,
-                                   background="#1b2837",
+                                   background=blauw,
                                    relief=RIDGE,
                                    borderwidth=1)
                 self.frame.pack(pady=(0, 20))
@@ -194,7 +206,7 @@ class SteamGUI:
         class ScaleStore:
             def __init__(self, master, to, command):
                 self.scale = Scale(master=master,
-                                   troughcolor="#4c8fb4",
+                                   troughcolor=lichtblauw,
                                    from_=0,
                                    to=to,
                                    length=200,
@@ -215,28 +227,6 @@ class SteamGUI:
         def applicatie_afsluiten(event):
             master.destroy()
 
-# Nog af te maken
-        def producten_tonen_op_price(gefilterde_prijs):
-            if int(gefilterde_prijs) == maximum_price:
-                label_gefilterde_price.label.configure(text="Any Price")
-            elif int(gefilterde_prijs) == 0:
-                label_gefilterde_price.label.configure(text=f"Free")
-            else:
-                label_gefilterde_price.label.configure(text=f"€{gefilterde_prijs},- & under")
-
-            getoonde_producten_sorteren(sort_by_optionmenu_waarde)
-
-# Nog af te maken
-        def producten_tonen_op_age(gefilterde_leeftijd):
-            if int(gefilterde_leeftijd) == maximum_age:
-                label_gefilterde_age.label.configure(text="Any Age")
-            elif int(gefilterde_leeftijd) == 0:
-                label_gefilterde_age.label.configure(text="0")
-            else:
-                label_gefilterde_age.label.configure(text=f"Age {gefilterde_leeftijd} & under")
-
-            getoonde_producten_sorteren(sort_by_optionmenu_waarde)
-
         def inhoud_listbox_aanpassen(lijst):
             """
             Inserts de elementen van de meegegeven lijst in listbox_producten.
@@ -253,21 +243,66 @@ class SteamGUI:
                                          f"{product['price']:>11.2f}"
                                          f"€")
 
+        def producten_tonen_op_price(lijst):
+            gefilterde_prijs = scale_filter_price.scale.get()
+            gefilterde_lijst = []
+
+            if gefilterde_prijs == maximum_price:
+                label_gefilterde_price.label.configure(text="Any Price")
+            elif gefilterde_prijs == 0:
+                label_gefilterde_price.label.configure(text=f"Free")
+            else:
+                label_gefilterde_price.label.configure(text=f"€{gefilterde_prijs},- & under")
+
+            if gefilterde_prijs == maximum_price:
+                return lijst
+            else:
+                for product in lijst:
+                    if product["price"] <= gefilterde_prijs:
+                        gefilterde_lijst.append(product)
+                return gefilterde_lijst
+
+        def producten_tonen_op_age(lijst):
+            gefilterde_leeftijd = scale_filter_age.scale.get()
+            gefilterde_lijst = []
+
+            if gefilterde_leeftijd == maximum_age:
+                label_gefilterde_age.label.configure(text="18+")
+            elif gefilterde_leeftijd == 0:
+                label_gefilterde_age.label.configure(text="Any Age")
+            else:
+                label_gefilterde_age.label.configure(text=f"Required Age: {gefilterde_leeftijd}")
+
+            if gefilterde_leeftijd == 0:
+                return lijst
+            else:
+                for product in lijst:
+                    if product["required_age"] >= gefilterde_leeftijd:
+                        gefilterde_lijst.append(product)
+                return gefilterde_lijst
+
         lijst_temp = []
 
         def getoonde_producten_sorteren(waarde):
             lijst = Sorteren.lijst_sorteren_op_optie(lijst_temp, sort_by_opties, waarde)
+            lijst = producten_tonen_op_price(lijst)
+            lijst = producten_tonen_op_age(lijst)
+            lijst = producten_tonen_op_age(lijst)
+
             inhoud_listbox_aanpassen(lijst)
 
         def producten_tonen(waarde):
             zoekterm = entry_zoekbalk_producten.get()
             lijst = Sorteren.producten_zoeken_op_naam(data, lijst_temp, zoekterm)
             lijst = Sorteren.lijst_sorteren_op_optie(lijst, sort_by_opties, waarde)
+            lijst = producten_tonen_op_price(lijst)
+            lijst = producten_tonen_op_age(lijst)
+
             inhoud_listbox_aanpassen(lijst)
 
         def geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen):
             for knop in knoppen:
-                knop.button.configure(foreground="#a1aab8")
+                knop.button.configure(foreground=lichtgrijs)
 
             geklikte_knop.button.configure(foreground="white")
 
@@ -309,7 +344,7 @@ class SteamGUI:
 
 # Widgets
         hoofdframe = Frame(master=master,
-                           background="#1b2837")
+                           background=blauw)
         hoofdframe.pack(fill=BOTH,
                         expand=TRUE)
 
@@ -334,21 +369,21 @@ class SteamGUI:
     # Schermen
         # Store scherm
         frame_store = Frame(master=hoofdframe,
-                            background="#1b2837")
+                            background=blauw)
 
         frame_store_producten = Frame(master=frame_store,
-                                      background="#1b2837")
+                                      background=blauw)
         frame_store_producten.pack(side=LEFT,
                                    padx=(240, 10))
             # Zoekbalk
         frame_zoekbalk_producten = Frame(master=frame_store_producten,
-                                         background="#101822")
+                                         background=navy)
         frame_zoekbalk_producten.pack(padx=10,
                                       pady=10)
 
         entry_zoekbalk_producten = Entry(master=frame_zoekbalk_producten,
                                          foreground="white",
-                                         background="#213a4a",
+                                         background=blauw2,
                                          width=30,
                                          font=("helvetica", 14))
         entry_zoekbalk_producten.pack(side=LEFT,
@@ -356,10 +391,10 @@ class SteamGUI:
                                       pady=10)
 
         knop_zoekbalk_producten = Button(master=frame_zoekbalk_producten,
-                                         foreground="#63cde8",
+                                         foreground=babyblauw,
                                          activeforeground="white",
-                                         background="#213a4a",
-                                         activebackground="#4685a7",
+                                         background=blauw2,
+                                         activebackground=lichtblauw,
                                          width=8,
                                          text="Search",
                                          font=("helvetica", 10, "bold"),
@@ -368,8 +403,8 @@ class SteamGUI:
 
             # Sort by
         label_sort_by = Label(master=frame_zoekbalk_producten,
-                              foreground="#2f475e",
-                              background="#101822",
+                              foreground=grijs,
+                              background=navy,
                               text="Sort by",
                               font=("helvetica", 10))
         label_sort_by.pack(side=LEFT,
@@ -390,10 +425,10 @@ class SteamGUI:
         optionmenu_sort_by = OptionMenu(frame_zoekbalk_producten,
                                         sort_by_optionmenu_waarde,
                                         *sort_by_opties)
-        optionmenu_sort_by.configure(foreground="#63cde8",
+        optionmenu_sort_by.configure(foreground=babyblauw,
                                      activeforeground="white",
-                                     background="#213a4a",
-                                     activebackground="#4685a7",
+                                     background=blauw2,
+                                     activebackground=lichtblauw,
                                      font=("helvetica", 10, "bold"),
                                      width=21,
                                      highlightthickness=0)
@@ -404,13 +439,13 @@ class SteamGUI:
 
             # Listbox
         frame_listbox_producten = Frame(master=frame_store_producten,
-                                        background="#1b2837")
+                                        background=blauw)
         frame_listbox_producten.pack()
 
         listbox_producten = Listbox(master=frame_listbox_producten,
-                                    foreground="#a1aab8",
-                                    background="#16202d",
-                                    selectbackground="#101821",
+                                    foreground=lichtgrijs,
+                                    background=donkerblauw,
+                                    selectbackground=navy,
                                     height=48,
                                     width=99,
                                     font=("monaco", 12))
@@ -424,7 +459,7 @@ class SteamGUI:
         listbox_producten.configure(yscrollcommand=scroll_bar_y_listbox_producten.set)
 
         frame_store_filters = Frame(master=frame_store,
-                                    background="#1b2837")
+                                    background=blauw)
         frame_store_filters.pack(side=LEFT)
 
             # Scales
@@ -432,17 +467,17 @@ class SteamGUI:
         maximum_age = 18
 
         frame_store_filters_price = FrameFilter(frame_store_filters)
-        label_filter_narrow_by_price = LabelFilter(frame_store_filters_price.frame, "#323e4b", "Narrow by Price", W, 0)
-        scale_filter_price = ScaleStore(frame_store_filters_price.frame, maximum_price, lambda gefilterde_prijs: producten_tonen_op_price(gefilterde_prijs))
-        label_gefilterde_price = LabelFilter(frame_store_filters_price.frame, "#1b2837", "Any Price", CENTER, 10)
+        label_filter_narrow_by_price = LabelFilter(frame_store_filters_price.frame, grijs, "Narrow by Price", W, 0)
+        scale_filter_price = ScaleStore(frame_store_filters_price.frame, maximum_price, lambda *args: getoonde_producten_sorteren(sort_by_optionmenu_waarde))
+        label_gefilterde_price = LabelFilter(frame_store_filters_price.frame, blauw, "Any Price", CENTER, 10)
 
         frame_store_filters_age = FrameFilter(frame_store_filters)
-        label_filter_narrow_by_age = LabelFilter(frame_store_filters_age.frame, "#323e4b", "Narrow by Age", W, 0)
-        scale_filter_age = ScaleStore(frame_store_filters_age.frame, maximum_age, lambda gefilterde_leeftijd: producten_tonen_op_age(gefilterde_leeftijd))
-        label_gefilterde_age = LabelFilter(frame_store_filters_age.frame, "#1b2837", "Any Age", CENTER, 10)
+        label_filter_narrow_by_age = LabelFilter(frame_store_filters_age.frame, grijs, "Narrow by Age", W, 0)
+        scale_filter_age = ScaleStore(frame_store_filters_age.frame, maximum_age, lambda *args: getoonde_producten_sorteren(sort_by_optionmenu_waarde))
+        label_gefilterde_age = LabelFilter(frame_store_filters_age.frame, blauw, "Any Age", CENTER, 10)
 
         frame_store_filters_tags = FrameFilter(frame_store_filters)
-        label_filter_tags = LabelFilter(frame_store_filters_tags.frame, "#323e4b", "Narrow by Tag", W, 0)
+        label_filter_tags = LabelFilter(frame_store_filters_tags.frame, grijs, "Narrow by Tag", W, 0)
 
             # Check boxes
         # Hier komen de check boxes.
@@ -485,8 +520,8 @@ if __name__ == "__main__":
 # To do:
         # Zorgen dat listbox bij default alle producten toont gesorteerd op rating                                                                       DONE
         # - Dropdown menu for Sort by                                                                                                                    DONE
-        # - Scale for price                                                                                                                              ALMOST DONE 
-        # - Scale for required_age                                                                                                                       ALMOST DONE
+        # - Scale for price                                                                                                                              DONE
+        # - Scale for required_age                                                                                                                       DONE
         # - Check buttons for platforms
         # - Check buttons for steamspy_tags
         # - Check buttons for genres
