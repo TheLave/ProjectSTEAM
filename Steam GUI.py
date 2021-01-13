@@ -1,7 +1,6 @@
 from tkinter import *
 import json
 
-
 class DataBewerking:
     @staticmethod
     def json_bestand_inlezen():
