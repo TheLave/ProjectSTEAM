@@ -47,7 +47,7 @@ class Sorteren:
     @staticmethod
     def merge_sort(lijst, zoekterm):
         """
-        Returnt een gesorteerde lijst van de meegegeven lijst, gesorteert volgens het merge sort algoritme gebaseerd op de meegegeven zoekterm.
+        Returnt de gesorteerde meegegeven lijst volgens het merge sort algoritme gebaseerd op de meegegeven zoekterm.
         """
         if len(lijst) > 1:
             index_midden_lijst = len(lijst) // 2
@@ -95,43 +95,6 @@ class Sorteren:
 
         return omgekeerde_lijst
 
-    @staticmethod
-    def producten_zoeken_op_naam(data, lijst, zoekterm):
-        """
-        Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm en returnt een lijst hiervan.
-        """
-        lijst.clear()
-
-        for product in data:
-            if zoekterm.lower() in product['name'].lower():
-                lijst.append(product)
-
-        return lijst
-
-    @staticmethod
-    def lijst_sorteren_op_optie(lijst, opties, waarde):
-        """
-        Sorteert en returnt de meegegeven lijst gebaseerd op de gekozen "sort by" keuze.
-        """
-        sortering = waarde
-
-        if sortering == opties[0] or sortering == opties[1]:
-            zoekterm = "release_date"
-        elif sortering == opties[2] or sortering == opties[3]:
-            zoekterm = "name"
-        elif sortering == opties[4] or sortering == opties[5]:
-            zoekterm = "price"
-        elif sortering == opties[6] or sortering == opties[7]:
-            zoekterm = "rating_percentage"
-
-        lijst = Sorteren.merge_sort(lijst, zoekterm)
-        lijst_omgekeerde_sortering = [opties[0], opties[3], opties[5], opties[6]]
-
-        if sortering in lijst_omgekeerde_sortering:
-            lijst = Sorteren.lijst_omkeren(lijst)
-
-        return lijst
-
 
 class SteamGUI:
     def __init__(self, master, data):
@@ -153,6 +116,39 @@ class SteamGUI:
                                          f"{product['rating']:>29}"
                                          f"{product['price']:>11.2f}"
                                          f"€")
+
+        def producten_zoeken_op_naam():
+            """
+            Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm en returnt een lijst hiervan.
+            """
+            lijst_temp.clear()
+
+            for product in data:
+                if entry_zoekbalk_producten.get().lower() in product['name'].lower():
+                    lijst_temp.append(product)
+
+        def lijst_sorteren_op_optie():
+            """
+            Sorteert en returnt de meegegeven lijst gebaseerd op de gekozen "sort by" keuze.
+            """
+            sortering = sort_by_optionmenu_waarde.get()
+
+            if sortering == sort_by_opties[0] or sortering == sort_by_opties[1]:
+                zoekterm = "release_date"
+            elif sortering == sort_by_opties[2] or sortering == sort_by_opties[3]:
+                zoekterm = "name"
+            elif sortering == sort_by_opties[4] or sortering == sort_by_opties[5]:
+                zoekterm = "price"
+            elif sortering == sort_by_opties[6] or sortering == sort_by_opties[7]:
+                zoekterm = "rating_percentage"
+
+            lijst = Sorteren.merge_sort(lijst_temp, zoekterm)
+            lijst_omgekeerde_sortering = [sort_by_opties[0], sort_by_opties[3], sort_by_opties[5], sort_by_opties[6]]
+
+            if sortering in lijst_omgekeerde_sortering:
+                lijst = Sorteren.lijst_omkeren(lijst_temp)
+
+            return lijst
 
         def producten_filteren_op_price(lijst):
             gefilterde_prijs = scale_filter_price.scale.get()
@@ -245,7 +241,7 @@ class SteamGUI:
         lijst_temp = []
 
         def getoonde_producten_sorteren_en_filteren():
-            lijst = Sorteren.lijst_sorteren_op_optie(lijst_temp, sort_by_opties, sort_by_optionmenu_waarde.get())
+            lijst = lijst_sorteren_op_optie()
             lijst = producten_filteren_op_price(lijst)
             lijst = producten_filteren_op_age(lijst)
             lijst = producten_filteren_op_language(lijst, checkbutton_tags_english)
@@ -256,9 +252,7 @@ class SteamGUI:
             inhoud_listbox_aanpassen(lijst)
 
         def producten_tonen():
-            zoekterm = entry_zoekbalk_producten.get()
-
-            Sorteren.producten_zoeken_op_naam(data, lijst_temp, zoekterm)
+            producten_zoeken_op_naam()
             getoonde_producten_sorteren_en_filteren()
 
         def geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen):
@@ -524,8 +518,6 @@ class SteamGUI:
                                      highlightthickness=0)
         optionmenu_sort_by.pack(side=LEFT,
                                 padx=10)
-
-
 
                 # Listbox
         frame_listbox_producten = Frame(master=frame_store_producten,
