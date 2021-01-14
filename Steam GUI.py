@@ -428,7 +428,7 @@ class SteamGUI:
         frame_menubalk2 = FrameMenubalk(hoofdframe)
         knoppen_menubalk2 = []
         knop_store = KnopMenubalk2(frame_menubalk2.frame, "STORE", lambda: store_scherm_tonen(knop_store, frame_store))
-        knop1 = KnopMenubalk2(frame_menubalk2.frame, "KNOP1", lambda: knop_1_scherm_tonen(knop1, frame_knop1))
+        knop_stats = KnopMenubalk2(frame_menubalk2.frame, "STATS", lambda: knop_1_scherm_tonen(knop_stats, frame_stats))
         knop2 = KnopMenubalk2(frame_menubalk2.frame, "KNOP2", lambda: knop_2_scherm_tonen(knop2, frame_knop2))
         knop3 = KnopMenubalk2(frame_menubalk2.frame, "KNOP3", lambda: knop_3_scherm_tonen(knop3, frame_knop3))
 
@@ -444,8 +444,8 @@ class SteamGUI:
         frame_store_producten.pack(side=LEFT,
                                    padx=(240, 10))
 
-        # Knop1 scherm
-        frame_knop1 = Frame(master=hoofdframe,
+        # Stats scherm
+        frame_stats = Frame(master=hoofdframe,
                             background="green")
 
         # Knop2 scherm
@@ -457,7 +457,7 @@ class SteamGUI:
                             background="yellow")
 
         applicatie_paginas.extend([frame_store,
-                                   frame_knop1,
+                                   frame_stats,
                                    frame_knop2,
                                    frame_knop3])
 
@@ -659,5 +659,3 @@ if __name__ == "__main__":
                 # Rating tonen bij zoeken van producten                                                                                                  DONE
 
     # Statistiek
-
-    # Steam API (vrienden) ???
