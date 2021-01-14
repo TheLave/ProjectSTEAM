@@ -390,8 +390,9 @@ class SteamGUI:
                                                text=text,
                                                font=("helvetica", 10),
                                                variable=self.var,
-                                               command=command)
-                self.checkbutton.pack()
+                                               command=command,
+                                               anchor=W)
+                self.checkbutton.pack(padx=(10, 0))
                 filter_tags.append(self)
 
 # Kleurencodes
