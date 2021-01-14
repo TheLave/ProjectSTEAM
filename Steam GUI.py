@@ -96,17 +96,15 @@ class Sorteren:
         return omgekeerde_lijst
 
     @staticmethod
-    def producten_zoeken_op_naam(data, lijst_temp, zoekterm):
+    def producten_zoeken_op_naam(data, lijst, zoekterm):
         """
         Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm en returnt een lijst hiervan.
         """
-        lijst = []
-        lijst_temp.clear()
+        lijst.clear()
 
         for product in data:
             if zoekterm.lower() in product['name'].lower():
                 lijst.append(product)
-                lijst_temp.append(product)
 
         return lijst
 
@@ -156,7 +154,7 @@ class SteamGUI:
                                          f"{product['price']:>11.2f}"
                                          f"€")
 
-        def producten_tonen_op_price(lijst):
+        def producten_filteren_op_price(lijst):
             gefilterde_prijs = scale_filter_price.scale.get()
             gefilterde_lijst = []
 
@@ -175,49 +173,93 @@ class SteamGUI:
                         gefilterde_lijst.append(product)
                 return gefilterde_lijst
 
-        def producten_tonen_op_age(lijst):
+        def producten_filteren_op_age(lijst):
             gefilterde_leeftijd = scale_filter_age.scale.get()
             gefilterde_lijst = []
 
-            if gefilterde_leeftijd == maximum_age:
+            if gefilterde_leeftijd == 18:
                 label_gefilterde_age.label.configure(text="18+")
-            elif gefilterde_leeftijd == 0:
-                label_gefilterde_age.label.configure(text="Any Age")
-            else:
-                label_gefilterde_age.label.configure(text=f"Required Age: {gefilterde_leeftijd}")
 
-            if gefilterde_leeftijd == 0:
-                return lijst
-            else:
                 for product in lijst:
-                    if product["required_age"] >= gefilterde_leeftijd:
+                    if product["required_age"] == 18:
+                        gefilterde_lijst.append(product)
+            else:
+                if gefilterde_leeftijd == 0:
+                    label_gefilterde_age.label.configure(text="Any Age")
+                else:
+                    label_gefilterde_age.label.configure(text=f"{gefilterde_leeftijd} & under")
+
+                for product in lijst:
+                    if product["required_age"] <= gefilterde_leeftijd:
+                        gefilterde_lijst.append(product)
+
+            return gefilterde_lijst
+
+        def geklikte_checkknop_highlighten(checkknop):
+            state = checkknop.var.get()
+
+            if state == 1:
+                checkknop.checkbutton.configure(activebackground=babyblauw,
+                                                background=babyblauw,
+                                                activeforeground="white",
+                                                foreground="white",
+                                                selectcolor=babyblauw)
+            else:
+                checkknop.checkbutton.configure(activebackground=blauw,
+                                                background=blauw,
+                                                activeforeground=blauw3,
+                                                foreground=blauw3,
+                                                selectcolor=blauw)
+
+        def producten_filteren_op_tag(lijst, checkknop, tag):
+            geklikte_checkknop_highlighten(checkknop)
+
+            state = checkknop.var.get()
+            gefilterde_lijst = []
+
+            if state == 1:
+                for product in lijst:
+                    if tag in product["categories"] \
+                            or tag in product["genres"] \
+                            or tag in product["steamspy_tags"] \
+                            or tag.lower() in product["platforms"]:
                         gefilterde_lijst.append(product)
                 return gefilterde_lijst
+            else:
+                return lijst
 
-        def producten_filteren_op_tag(tag):
-            pass
+        def producten_filteren_op_language(lijst, checkknop):
+            geklikte_checkknop_highlighten(checkknop)
 
-        def producten_filteren_op_language():
-            pass
+            state = checkknop.var.get()
+            gefilterde_lijst = []
+
+            if state == 1:
+                for product in lijst:
+                    if product["english"] == 1:
+                        gefilterde_lijst.append(product)
+                return gefilterde_lijst
+            else:
+                return lijst
 
         lijst_temp = []
 
-        def getoonde_producten_sorteren():
+        def getoonde_producten_sorteren_en_filteren():
             lijst = Sorteren.lijst_sorteren_op_optie(lijst_temp, sort_by_opties, sort_by_optionmenu_waarde.get())
-            lijst = producten_tonen_op_price(lijst)
-            lijst = producten_tonen_op_age(lijst)
-            lijst = producten_tonen_op_age(lijst)
+            lijst = producten_filteren_op_price(lijst)
+            lijst = producten_filteren_op_age(lijst)
+            lijst = producten_filteren_op_language(lijst, checkbutton_tags_english)
+
+            for checkbutton in checkbuttons:
+                lijst = producten_filteren_op_tag(lijst, checkbutton, checkbutton.checkbutton["text"])
 
             inhoud_listbox_aanpassen(lijst)
 
         def producten_tonen():
             zoekterm = entry_zoekbalk_producten.get()
-            lijst = Sorteren.producten_zoeken_op_naam(data, lijst_temp, zoekterm)
-            lijst = Sorteren.lijst_sorteren_op_optie(lijst, sort_by_opties, sort_by_optionmenu_waarde.get())
-            lijst = producten_tonen_op_price(lijst)
-            lijst = producten_tonen_op_age(lijst)
 
-            inhoud_listbox_aanpassen(lijst)
+            Sorteren.producten_zoeken_op_naam(data, lijst_temp, zoekterm)
+            getoonde_producten_sorteren_en_filteren()
 
         def geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen):
             for knop in knoppen:
@@ -244,6 +286,11 @@ class SteamGUI:
 
             for tag in filter_tags:
                 tag.checkbutton.deselect()
+                tag.checkbutton.configure(activebackground=blauw,
+                                          background=blauw,
+                                          activeforeground=blauw3,
+                                          foreground=blauw3,
+                                          selectcolor=blauw)
 
             producten_tonen()
 
@@ -332,6 +379,7 @@ class SteamGUI:
 
         class CheckKnopStoreOpties:
             def __init__(self, master, text, command):
+                self.var = IntVar()
                 self.checkbutton = Checkbutton(master=master,
                                                width=26,
                                                activebackground=blauw,
@@ -341,7 +389,7 @@ class SteamGUI:
                                                selectcolor=blauw,
                                                text=text,
                                                font=("helvetica", 10),
-                                               variable=IntVar(),
+                                               variable=self.var,
                                                command=command)
                 self.checkbutton.pack()
                 filter_tags.append(self)
@@ -461,7 +509,7 @@ class SteamGUI:
 
         sort_by_optionmenu_waarde = StringVar()
         sort_by_optionmenu_waarde.set(sort_by_opties[0])
-        sort_by_optionmenu_waarde.trace("w", lambda *args: getoonde_producten_sorteren())
+        sort_by_optionmenu_waarde.trace("w", lambda *args: getoonde_producten_sorteren_en_filteren())
 
         optionmenu_sort_by = OptionMenu(frame_zoekbalk_producten,
                                         sort_by_optionmenu_waarde,
@@ -506,56 +554,78 @@ class SteamGUI:
 
                     # Scales
         maximum_price = 60
-        maximum_age = 18
 
         frame_store_filters_price = FrameFilter(frame_store_filters)
         label_filter_narrow_by_price = LabelFilter(frame_store_filters_price.frame, "white", grijs, "Narrow by Price", W, 0)
-        scale_filter_price = ScaleStore(frame_store_filters_price.frame, maximum_price, lambda *args: getoonde_producten_sorteren())
+        scale_filter_price = ScaleStore(frame_store_filters_price.frame, maximum_price, lambda *args: getoonde_producten_sorteren_en_filteren())
         label_gefilterde_price = LabelFilter(frame_store_filters_price.frame, blauw3, blauw, "Any Price", CENTER, 10)
 
         frame_store_filters_age = FrameFilter(frame_store_filters)
         label_filter_narrow_by_age = LabelFilter(frame_store_filters_age.frame, "white", grijs, "Narrow by Age", W, 0)
-        scale_filter_age = ScaleStore(frame_store_filters_age.frame, maximum_age, lambda *args: getoonde_producten_sorteren())
+        scale_filter_age = ScaleStore(frame_store_filters_age.frame, 18, lambda *args: getoonde_producten_sorteren_en_filteren())
         label_gefilterde_age = LabelFilter(frame_store_filters_age.frame, blauw3, blauw, "Any Age", CENTER, 10)
 
-                    # Check boxes
+                    # Check buttons
         frame_store_filters_tags = FrameFilter(frame_store_filters)
         label_filter_narrow_by_tag = LabelFilter(frame_store_filters_tags.frame, "white", grijs, "Narrow by Tag", W, 0)
 
         filter_tags = []
 
-                    # Popular tags
-        checkbutton_tags_singleplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Single-player", lambda: producten_filteren_op_tag("Single-player"))
-        checkbutton_tags_multiplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Multi-player", lambda: producten_filteren_op_tag("Multi-player"))
-        checkbutton_tags_action = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Action", lambda: producten_filteren_op_tag("Action"))
-        checkbutton_tags_adventure = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Adventure", lambda: producten_filteren_op_tag("Adventure"))
-        checkbutton_tags_casual = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Casual", lambda: producten_filteren_op_tag("Casual"))
-        checkbutton_tags_co_op = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Co-op", lambda: producten_filteren_op_tag("Co-op"))
-        checkbutton_tags_first_person = CheckKnopStoreOpties(frame_store_filters_tags.frame, "First-Person", lambda: producten_filteren_op_tag("First-Person"))
-        checkbutton_tags_fps = CheckKnopStoreOpties(frame_store_filters_tags.frame, "FPS", lambda: producten_filteren_op_tag("FPS"))
-        checkbutton_tags_great_soundtrack = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Great Soundtrack", lambda: producten_filteren_op_tag("Great Soundtrack"))
-        checkbutton_tags_horror = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Horror", lambda: producten_filteren_op_tag("Horror"))
-        checkbutton_tags_indie = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Indie", lambda: producten_filteren_op_tag("Indie"))
-        checkbutton_tags_open_world = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Open World", lambda: producten_filteren_op_tag("Open World"))
-        checkbutton_tags_racing = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Racing", lambda: producten_filteren_op_tag("Racing"))
-        checkbutton_tags_rpg = CheckKnopStoreOpties(frame_store_filters_tags.frame, "RPG", lambda: producten_filteren_op_tag("RPG"))
-        checkbutton_tags_simulation = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Simulation", lambda: producten_filteren_op_tag("Simulation"))
-        checkbutton_tags_sports = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Sports", lambda: producten_filteren_op_tag("Sports"))
-        checkbutton_tags_story_rich = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Story Rich", lambda: producten_filteren_op_tag("Story Rich"))
-        checkbutton_tags_strategy = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Strategy", lambda: producten_filteren_op_tag("Strategy"))
-        checkbutton_tags_2d = CheckKnopStoreOpties(frame_store_filters_tags.frame, "2D", lambda: producten_filteren_op_tag("2D"))
+                        # Popular tags
+        checkbutton_tags_singleplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Single-player", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_multiplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Multi-player", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_action = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Action", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_adventure = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Adventure", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_casual = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Casual", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_co_op = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Co-op", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_first_person = CheckKnopStoreOpties(frame_store_filters_tags.frame, "First-Person", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_fps = CheckKnopStoreOpties(frame_store_filters_tags.frame, "FPS", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_great_soundtrack = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Great Soundtrack", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_horror = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Horror", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_indie = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Indie", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_open_world = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Open World", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_racing = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Racing", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_rpg = CheckKnopStoreOpties(frame_store_filters_tags.frame, "RPG", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_simulation = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Simulation", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_sports = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Sports", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_story_rich = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Story Rich", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_strategy = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Strategy", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_2d = CheckKnopStoreOpties(frame_store_filters_tags.frame, "2D", getoonde_producten_sorteren_en_filteren)
 
-                    # Platforms
+                        # Platforms
         frame_store_filters_platforms = FrameFilter(frame_store_filters)
         label_filter_platforms = LabelFilter(frame_store_filters_platforms.frame, "white", grijs, "Narrow by OS", W, 0)
-        checkbutton_tags_windows = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Windows", lambda: producten_filteren_op_tag("windows"))
-        checkbutton_tags_mac = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Mac OS X", lambda: producten_filteren_op_tag("mac"))
-        checkbutton_tags_linux = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "SteamOS + Linux", lambda: producten_filteren_op_tag("linux"))
+        checkbutton_tags_windows = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Windows", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_mac = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Mac", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_linux = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Linux", getoonde_producten_sorteren_en_filteren)
 
-                    # Languages
+        checkbuttons = [checkbutton_tags_singleplayer,
+                        checkbutton_tags_multiplayer,
+                        checkbutton_tags_action,
+                        checkbutton_tags_adventure,
+                        checkbutton_tags_casual,
+                        checkbutton_tags_co_op,
+                        checkbutton_tags_first_person,
+                        checkbutton_tags_fps,
+                        checkbutton_tags_great_soundtrack,
+                        checkbutton_tags_horror,
+                        checkbutton_tags_indie,
+                        checkbutton_tags_open_world,
+                        checkbutton_tags_racing,
+                        checkbutton_tags_rpg,
+                        checkbutton_tags_simulation,
+                        checkbutton_tags_sports,
+                        checkbutton_tags_story_rich,
+                        checkbutton_tags_strategy,
+                        checkbutton_tags_2d,
+                        checkbutton_tags_windows,
+                        checkbutton_tags_mac,
+                        checkbutton_tags_linux]
+
+                        # Languages
         frame_store_filters_language = FrameFilter(frame_store_filters)
         label_filter_language = LabelFilter(frame_store_filters_language.frame, "white", grijs, "Narrow by Language", W, 0)
-        checkbutton_tags_english = CheckKnopStoreOpties(frame_store_filters_language.frame, "English", producten_filteren_op_language)
+        checkbutton_tags_english = CheckKnopStoreOpties(frame_store_filters_language.frame, "English", getoonde_producten_sorteren_en_filteren)
 
     # Store tonen bij het opstarten van de applicatie.
         store_scherm_tonen(knop_store, frame_store)
@@ -574,14 +644,14 @@ if __name__ == "__main__":
     main()
 
 # To do:
-    # Sorteren                                                                                                                                           ALMOST DONE
+    # Sorteren                                                                                                                                           DONE
         # Zorgen dat listbox bij default alle producten toont gesorteerd op rating                                                                       DONE
         # - Dropdown menu for Sort by                                                                                                                    DONE
         # - Scale for price                                                                                                                              DONE
         # - Scale for required_age                                                                                                                       DONE
-        # - Check buttons for most common categories, genres, steamspy_tags,                                                                             ALMOST DONE
-        # - Check buttons for platforms                                                                                                                  ALMOST DONE
-        # - Check button for language "English"                                                                                                          ALMOST DONE
+        # - Check buttons for most common categories, genres, steamspy_tags,                                                                             DONE
+        # - Check buttons for platforms                                                                                                                  DONE
+        # - Check button for language "English"                                                                                                          DONE
         # - Rating system                                                                                                                                DONE
                 # Functie schrijven om ratingspercentage van producten toe te voegen aan de data                                                         DONE
                 # ratingspercentage koppelen aan rating en toevoegen aan data(Overwhelmingly positive, Positive, Mixed, Mostly Negative, etc...          DONE
