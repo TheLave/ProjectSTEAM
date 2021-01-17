@@ -299,6 +299,65 @@ class SteamGUI:
         def knop_3_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
+            
+        def statistiek_kwantitatief():
+            zoek_term = []
+            for i in range(len(data)):
+                if genre_entry.get().lower() in data[i]['genres'].lower():
+                    zoek_term.append(data[i]['name'])
+
+            percentage = (len(zoek_term) / len(data)) * 100
+
+            tekst_kwantitatief = "Er zijn {} games met '{}' als genre. \nDat is {:<.1f}% van alle {} games."
+            label_kwantitatief["text"] = tekst_kwantitatief.format(len(zoek_term), genre_entry.get(), percentage, len(data))
+            
+        def statistiek_kwalitatief():
+            range_gratis = []
+            range_0_10 = []
+            range_10_30 = []
+            range_30_45 = []
+            range_45_60 = []
+            range_boven_60 = []
+
+            for i in range(len(data)):
+                if data[i]['price'] == 0:
+                    range_gratis.append(data[i]['average_playtime'])
+                    gemiddelde_1 = sum(range_gratis) / len(range_gratis)
+
+                if data[i]['price'] > 0 and data[i]['price'] < 10:
+                    range_0_10.append(data[i]['average_playtime'])
+                    gemiddelde_2 = sum(range_0_10) / len(range_0_10)
+
+                if data[i]['price'] > 10 and data[i]['price'] < 30:
+                    range_10_30.append(data[i]['average_playtime'])
+                    gemiddelde_3 = sum(range_10_30) / len(range_10_30)
+
+                if data[i]['price'] > 30 and data[i]['price'] < 45:
+                    range_30_45.append(data[i]['average_playtime'])
+                    gemiddelde_4 = sum(range_30_45) / len(range_30_45)
+
+                if data[i]['price'] > 45 and data[i]['price'] < 60:
+                    range_45_60.append(data[i]['average_playtime'])
+                    gemiddelde_5 = sum(range_45_60) / len(range_45_60)
+
+                if data[i]['price'] >= 60:
+                    range_boven_60.append(data[i]['average_playtime'])
+                    gemiddelde_6 = sum(range_boven_60) / len(range_boven_60)
+
+            tekst_kwalitatief = (
+                f"Er zijn {len(range_gratis)} games in de prijs range: 'gratis'. "
+                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_1:<.0f}uur"
+                f"\nEr zijn {len(range_0_10)} games in de prijs range: €0.01<€10. "
+                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_2:<.0f}uur "
+                f"\nEr zijn {len(range_10_30)} games in de prijs range: €10<€30. "
+                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_3:<.0f}uur "
+                f"\nEr zijn {len(range_30_45)} games in de prijs range: €30<€45. "
+                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_4:<.0f}uur "
+                f"\nEr zijn {len(range_45_60)} games in de prijs range: €45<€60. "
+                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_5:<.0f}uur "
+                f"\nEr zijn {len(range_boven_60)} games in de prijs range: >€60. "
+                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_6:<.0f}uur ")
+            label_kwalitatief["text"] = tekst_kwalitatief
 
         class FrameMenubalk:
             def __init__(self, master):
@@ -439,8 +498,70 @@ class SteamGUI:
                                    padx=(240, 10))
 
         # Stats scherm
+        master.config(bg=blauw)
+
         frame_stats = Frame(master=hoofdframe,
-                            background="green")
+                            bg=blauw)
+        frame_stats.pack(side=TOP, padx=10, pady=10)
+
+        totaal_frame = Frame(master=frame_stats,
+                                  background=blauw,
+                                  height=500,
+                                  width=800)
+        totaal_frame.pack_propagate(False)
+        totaal_frame.pack(side=TOP, anchor=W)
+
+        intro_label = Label(master=totaal_frame,
+                            text='Statistieken',
+                            bg=blauw,
+                            fg='white',
+                            font=("Helvetica", 14, "bold"))
+        intro_label.pack(side=TOP, fill=X, pady=10)
+
+        genre_label = Label(master=totaal_frame,
+                            text='Van welk genre wil je het percentage games weten?: ',
+                            bg=blauw,
+                            foreground='white',
+                            font=("Helvetica", 14, ""))
+
+        genre_label.pack(pady=5)
+
+        genre_entry = Entry(master=totaal_frame)
+        genre_entry.pack(padx=10, pady=10)
+
+        test_button = Button(master=totaal_frame,
+                             text='druk hier',
+                             command=statistiek_kwantitatief)
+        test_button.pack(pady=10)
+
+        kwantitatief_frame = Frame(master=totaal_frame,
+                                   bg=blauw)
+        kwantitatief_frame.pack(fill='both', expand=True, pady=5)
+
+        label_kwantitatief = Label(master=totaal_frame,
+                                   bg=blauw,
+                                   fg='white',
+                                   font=("Helvetica", 10, "bold"))
+        label_kwantitatief.pack(pady=5)
+
+        kwalitatief_frame = Frame(master=totaal_frame,
+                                  bg=blauw)
+        kwalitatief_frame.pack(fill='both', expand=True, pady=5)
+
+        kwalitatief_info = Label(master=totaal_frame,
+                                 bg=blauw,
+                                 fg='white',
+                                 font=("Helvetica", 10, "bold"),
+                                 text="Vergelijkingen prijs met speeltijd: ")
+        kwalitatief_info.pack()
+
+        label_kwalitatief = Label(master=totaal_frame,
+                                  bg=blauw,
+                                  fg='white',
+                                  font=("Helvetica", 10, "bold"))
+        label_kwalitatief.pack(pady=5)
+
+        statistiek_kwalitatief()
 
         # Knop2 scherm
         frame_knop2 = Frame(master=hoofdframe,
