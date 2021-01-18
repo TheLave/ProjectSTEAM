@@ -4,7 +4,10 @@ import urllib.request, json
 from time import *
 from datetime import datetime
 from tkinter import messagebox
-import I2C_LCD_driver
+try:
+	import I2C_LCD_driver
+except:
+	print('Display driver niet geinitieerd. Programma draait niet op een RPi.')
 
 
 class DataBewerking:
