@@ -8,12 +8,18 @@ from tkinter import messagebox
 
 class DataBewerking:
     @staticmethod
-    def json_bestand_inlezen():
-        with open("steam.json", "r") as json_file:
+    def json_bestand_inlezen(json_file):
+        """
+        Leest een json bestand in.
+        """
+        with open(json_file, "r") as json_file:
             return json.load(json_file)
 
     @staticmethod
     def rating_en_rating_percentage_toevoegen_aan_data(data):
+        """
+        Voegt rating(spercentage) toe aan de data.
+        """
         i = 0
 
         for product in data:
@@ -103,6 +109,9 @@ class Sorteren:
 class SteamGUI:
     def __init__(self, master, data):
         def applicatie_afsluiten(event):
+            """
+            Sluit de applicatie af.
+            """
             master.destroy()
 
         def inhoud_listbox_aanpassen(lijst):
@@ -155,6 +164,9 @@ class SteamGUI:
             return lijst
 
         def producten_filteren_op_price(lijst):
+            """
+            Filtert de producten op de prijs.
+            """
             gefilterde_prijs = scale_filter_price.scale.get()
             gefilterde_lijst = []
 
@@ -174,6 +186,9 @@ class SteamGUI:
                 return gefilterde_lijst
 
         def producten_filteren_op_age(lijst):
+            """
+            Filtert de producten op de leeftijd.
+            """
             gefilterde_leeftijd = scale_filter_age.scale.get()
             gefilterde_lijst = []
 
@@ -196,6 +211,9 @@ class SteamGUI:
             return gefilterde_lijst
 
         def geklikte_checkknop_highlighten(checkknop):
+            """
+            Highlight de gekozen checkknop.
+            """
             state = checkknop.var.get()
 
             if state == 1:
@@ -212,6 +230,9 @@ class SteamGUI:
                                                 selectcolor=blauw)
 
         def producten_filteren_op_tag(lijst, checkknop, tag):
+            """
+            Filtert de producten op de aangeklikte tag.
+            """
             geklikte_checkknop_highlighten(checkknop)
 
             state = checkknop.var.get()
@@ -229,6 +250,9 @@ class SteamGUI:
                 return lijst
 
         def producten_filteren_op_language(lijst, checkknop):
+            """
+            Filtert de producten op de aangeklikte taal.
+            """
             geklikte_checkknop_highlighten(checkknop)
 
             state = checkknop.var.get()
@@ -245,6 +269,9 @@ class SteamGUI:
         lijst_temp = []
 
         def getoonde_producten_sorteren_en_filteren():
+            """
+            Sorteert en filtert de gezochte producten.
+            """
             lijst = lijst_sorteren_op_optie()
             lijst = producten_filteren_op_price(lijst)
             lijst = producten_filteren_op_age(lijst)
@@ -256,16 +283,25 @@ class SteamGUI:
             inhoud_listbox_aanpassen(lijst)
 
         def producten_tonen():
+            """
+            Toont de gezochte producten.
+            """
             producten_zoeken_op_naam()
             getoonde_producten_sorteren_en_filteren()
 
         def geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen):
+            """
+            Highlight de gekozen pagina knop.
+            """
             for knop in knoppen:
                 knop.button.configure(foreground=lichtgrijs)
 
             geklikte_knop.button.configure(foreground="white")
 
         def applicatie_pagina_tonen(gekozen_pagina, paginas):
+            """
+            Toont de gekozen pagina.
+            """
             for pagina in paginas:
                 pagina.forget()
 
@@ -273,6 +309,9 @@ class SteamGUI:
                                 expand=TRUE)
 
         def store_scherm_tonen(geklikte_knop, gekozen_pagina):
+            """
+            Toont de "Store" pagina.
+            """
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
@@ -293,10 +332,16 @@ class SteamGUI:
             producten_tonen()
 
         def stats_scherm_tonen(geklikte_knop, gekozen_pagina):
+            """
+            Toont de "Stats" pagina.
+            """
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
         def raspi_scherm_tonen(geklikte_knop, gekozen_pagina):
+            """
+            Toont de "Raspi" pagina.
+            """
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
@@ -633,7 +678,6 @@ class SteamGUI:
             scherm_ti_conf(knop_servo, knop_neopixels, knop_schuifregister, knop_display)
 
         def scherm_ti_conf(knop1, knop2, knop3, knop4):
-
             frame_servo_neopixels.pack(side=LEFT,
                                        padx=50,
                                        pady=(70, 400))
@@ -708,7 +752,11 @@ class SteamGUI:
                                 pady=(60, 0))
 
         def statistiek_kwalitatief():
+            """
+            Vraagt om invoering van game genre en berekent & toont het percentage van het totaal aantal games met dat genre.
+            """
             zoek_term = []
+
             for i in range(len(data)):
                 if genre_entry.get().lower() in data[i]['genres'].lower():
                     zoek_term.append(data[i]['name'])
@@ -716,9 +764,13 @@ class SteamGUI:
             percentage = (len(zoek_term) / len(data)) * 100
 
             tekst_kwalitatief = "There are {} games with '{}' as genre. \nThat is {:<.1f}% of all {} games."
-            label_kwalitatief["text"] = tekst_kwalitatief.format(len(zoek_term), genre_entry.get(), percentage, len(data))
+            label_kwalitatief["text"] = tekst_kwalitatief.format(len(zoek_term), genre_entry.get(), percentage,
+                                                                 len(data))
 
         def statistiek_kwantitatief():
+            """
+            Toont de average playtime bij de price.
+            """
             range_gratis = []
             range_0_10 = []
             range_10_30 = []
@@ -752,8 +804,8 @@ class SteamGUI:
                     gemiddelde_6 = sum(range_boven_60) / len(range_boven_60)
 
             tekst_kwantitatief = (
-                f"There are {len(range_gratis)} games in the price range: 'free'. "
-                f"These have an average playtime of: {gemiddelde_1:<.0f}hourr"
+                f"There are {len(range_gratis)} free games on Steam. "
+                f"These have an average playtime of: {gemiddelde_1:<.0f}hour"
                 f"\nThere are {len(range_0_10)} games in the price range: €0.01<€10. "
                 f"These have an average playtime of: {gemiddelde_2:<.0f}hour "
                 f"\nThere are {len(range_10_30)} games in the price range: €10<€30. "
@@ -767,12 +819,18 @@ class SteamGUI:
             label_kwantitatief["text"] = tekst_kwantitatief
 
         class FrameMenubalk:
+            """
+            Constructor voor het maken van menubalken.
+            """
             def __init__(self, master):
                 self.frame = Frame(master=master,
                                    background=donkergrijs)
                 self.frame.pack(fill=X)
 
         class KnopMenubalk1:
+            """
+            Constructor voor het maken van knoppen op menubalk 1.
+            """
             def __init__(self, master, text, command):
                 self.button = Button(master=master,
                                      foreground=lichtgrijs,
@@ -788,6 +846,9 @@ class SteamGUI:
                                  padx=15)
 
         class KnopMenubalk2:
+            """
+            Constructor voor het maken van knoppen op menubalk 2.
+            """
             def __init__(self, master, text, command):
                 self.button = Button(master=master,
                                      foreground=lichtgrijs,
@@ -805,6 +866,9 @@ class SteamGUI:
                 knoppen_menubalk2.append(self)
 
         class FrameFilter:
+            """
+            Constructor voor het maken van frames voor filters.
+            """
             def __init__(self, master):
                 self.frame = Frame(master=master,
                                    background=blauw,
@@ -813,6 +877,9 @@ class SteamGUI:
                 self.frame.pack(pady=(0, 20))
 
         class LabelFilter:
+            """
+            Constructor voor het maken van labels voor filters.
+            """
             def __init__(self, master, foreground, background, text, anchor, pady):
                 self.label = Label(master=master,
                                    foreground=foreground,
@@ -824,6 +891,9 @@ class SteamGUI:
                 self.label.pack(pady=pady)
 
         class ScaleStore:
+            """
+            Constructor voor het maken van scales voor filters.
+            """
             def __init__(self, master, to, command):
                 self.scale = Scale(master=master,
                                    troughcolor=babyblauw,
@@ -840,6 +910,9 @@ class SteamGUI:
                 self.scale.pack(pady=(15, 0))
 
         class CheckKnopStoreOpties:
+            """
+            Constructor voor het maken van checkbuttons voor filters.
+            """
             def __init__(self, master, text, command):
                 self.var = IntVar()
                 self.checkbutton = Checkbutton(master=master,
@@ -897,7 +970,7 @@ class SteamGUI:
         # Applicatie pagina's
         applicatie_paginas = []
 
-        # Store scherm
+        # Store pagina
         frame_store = Frame(master=hoofdframe,
                             background=blauw)
 
@@ -906,15 +979,13 @@ class SteamGUI:
         frame_store_producten.pack(side=LEFT,
                                    padx=(240, 10))
 
-
-
-        # Stats scherm
+        # Stats pagina
         frame_stats = Frame(master=hoofdframe,
                             background=blauw)
 
-        # Raspi scherm
+        # Raspi pagina
         frame_raspi = Frame(master=hoofdframe,
-                         background=blauw)
+                            background=blauw)
 
         # Widgets op Raspi scherm
         # frame 1 servo en neopixels
@@ -1237,14 +1308,7 @@ class SteamGUI:
         # Store tonen bij het opstarten van de applicatie.
         store_scherm_tonen(knop_store, frame_store)
 
-        #Stats Pagina
         #Widgets op Stats pagina
-        master.config(bg=blauw)
-
-        frame_stats = Frame(master=hoofdframe,
-                            bg=blauw)
-        frame_stats.pack(side=TOP, padx=10, pady=10)
-
         totaal_frame = Frame(master=frame_stats,
                              background=blauw,
                              height=500,
@@ -1257,21 +1321,26 @@ class SteamGUI:
                             bg=blauw,
                             fg='white',
                             font=("Helvetica", 28, "bold"))
-        intro_label.pack(side=TOP, fill=X, pady=10)
+        intro_label.pack(side=TOP,
+                         fill=X,
+                         pady=10)
 
         kwalitatief_frame = Frame(master=totaal_frame,
                                   bg=blauw)
-        kwalitatief_frame.pack(fill='both', expand=True, pady=5)
+        kwalitatief_frame.pack(fill='both',
+                               expand=True,
+                               pady=5)
 
         genre_label = Label(master=totaal_frame,
-                            text='Off which genre would you like to know the percentage?: ',
+                            text='Of which genre would you like to know the percentage of our total products?',
                             bg=blauw,
                             foreground='white',
                             font=("Helvetica", 14, ""))
         genre_label.pack(pady=5)
 
         genre_entry = Entry(master=totaal_frame)
-        genre_entry.pack(padx=10, pady=10)
+        genre_entry.pack(padx=10,
+                         pady=10)
 
         test_button = Button(master=totaal_frame,
                              text='search',
@@ -1284,30 +1353,32 @@ class SteamGUI:
                                   font=("Helvetica", 10, "bold"))
         label_kwalitatief.pack(pady=5)
 
-
-
         kwantitatief_frame = Frame(master=totaal_frame,
-                                  bg=blauw)
+                                   bg=blauw)
         kwantitatief_frame.pack(fill='both', expand=True, pady=5)
 
         kwantitatief_info = Label(master=totaal_frame,
-                                 bg=blauw,
-                                 fg='white',
-                                 font=("Helvetica", 10, "bold"),
-                                 text="Comparison price with average playtime: ")
+                                  bg=blauw,
+                                  fg='white',
+                                  font=("Helvetica", 10, "bold"),
+                                  text="Comparison price with average playtime: ")
         kwantitatief_info.pack()
 
         label_kwantitatief = Label(master=totaal_frame,
-                                  bg=blauw,
-                                  fg='white',
-                                  font=("Helvetica", 10, "bold"))
+                                   bg=blauw,
+                                   fg='white',
+                                   font=("Helvetica", 10, "bold"))
         label_kwantitatief.pack(pady=5)
 
         statistiek_kwantitatief()
 
 
 def main():
-    data = DataBewerking.json_bestand_inlezen()
+    """
+    Runt de applicatie.
+    """
+    steam_json = "steam.json"
+    data = DataBewerking.json_bestand_inlezen(steam_json)
     DataBewerking.rating_en_rating_percentage_toevoegen_aan_data(data)
 
     root = Tk()
