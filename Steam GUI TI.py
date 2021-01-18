@@ -303,7 +303,7 @@ class SteamGUI:
             try:
                 import RPi.GPIO as GPIO
                 import I2C_LCD_driver
-            except:
+            except ModuleNotFoundError:
                 messagebox.showerror(title='Geen raspberry Pi', message='het lijkt erop dat u niet op een raspberry'
                                                                         ' Pi bezig bent dus heeft dit tablad geen '
                                                                         'functionaliteit voor u. U wordt terug'
@@ -444,7 +444,6 @@ class SteamGUI:
                 sleep(delay2)
 
             def servo_pulse(pin_nr, position):
-
                 delay = 0.0005 + (0.00002 * position)
 
                 pulse(pin_nr, delay, 0.02)
