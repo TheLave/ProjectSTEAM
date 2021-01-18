@@ -633,7 +633,6 @@ class SteamGUI:
             scherm_ti_conf(knop_servo, knop_neopixels, knop_schuifregister, knop_display)
 
         def scherm_ti_conf(knop1, knop2, knop3, knop4):
-
             frame_servo_neopixels.pack(side=LEFT,
                                        padx=50,
                                        pady=(70, 400))
