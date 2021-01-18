@@ -9,6 +9,8 @@ class DataBewerking:
             return json.load(json_file)
 
     @staticmethod
+
+    # de rating en het ratingspercentage toevoegen aan de data 
     def rating_en_rating_percentage_toevoegen_aan_data(data):
         i = 0
 
@@ -45,6 +47,8 @@ class DataBewerking:
 
 class Sorteren:
     @staticmethod
+    
+    # een sorteer algoritme volgens het 'merge' principe
     def merge_sort(lijst, zoekterm):
         """
         Returnt de gesorteerde meegegeven lijst volgens het merge sort algoritme gebaseerd op de meegegeven zoekterm.
@@ -83,6 +87,8 @@ class Sorteren:
         return lijst
 
     @staticmethod
+
+    # een functie om de lijst om te keren
     def lijst_omkeren(lijst):
         """
         Returnt het omgekeerde van de gegeven lijst.
@@ -98,9 +104,12 @@ class Sorteren:
 
 class SteamGUI:
     def __init__(self, master, data):
+        
+        # Een functie om de applicatie via de escape-knop af te sluiten
         def applicatie_afsluiten(event):
             master.destroy()
-
+    
+        # Een functie om de listbox aan te passen a.d.h.v. de sorteer keuze 
         def inhoud_listbox_aanpassen(lijst):
             """
             Inserts de elementen van de meegegeven lijst in listbox_producten.
@@ -117,6 +126,7 @@ class SteamGUI:
                                          f"{product['price']:>11.2f}"
                                          f"€")
 
+        # Deze functie zoekt naar producten uit een lijst a.d.h.v. de productnaam
         def producten_zoeken_op_naam():
             """
             Zoekt naar producten waarvan de naam overeenkomt met de gegeven zoekterm en returnt een lijst hiervan.
@@ -127,6 +137,7 @@ class SteamGUI:
                 if entry_zoekbalk_producten.get().lower() in product['name'].lower():
                     lijst_temp.append(product)
 
+        # Deze functie sorteerd de data op basis van user-input
         def lijst_sorteren_op_optie():
             """
             Sorteert en returnt de meegegeven lijst gebaseerd op de gekozen "sort by" keuze.
@@ -150,6 +161,7 @@ class SteamGUI:
 
             return lijst
 
+        # Deze functie filtert de data op prijs
         def producten_filteren_op_price(lijst):
             gefilterde_prijs = scale_filter_price.scale.get()
             gefilterde_lijst = []
@@ -169,6 +181,7 @@ class SteamGUI:
                         gefilterde_lijst.append(product)
                 return gefilterde_lijst
 
+        # deze functie filtered de data op minimum-leeftijd
         def producten_filteren_op_age(lijst):
             gefilterde_leeftijd = scale_filter_age.scale.get()
             gefilterde_lijst = []
@@ -190,7 +203,8 @@ class SteamGUI:
                         gefilterde_lijst.append(product)
 
             return gefilterde_lijst
-
+    
+        # deze functie zorgt dat een geselecteerde knop gehighlight word
         def geklikte_checkknop_highlighten(checkknop):
             state = checkknop.var.get()
 
@@ -207,6 +221,7 @@ class SteamGUI:
                                                 foreground=blauw3,
                                                 selectcolor=blauw)
 
+        # deze functie filtert de data op tags
         def producten_filteren_op_tag(lijst, checkknop, tag):
             geklikte_checkknop_highlighten(checkknop)
 
@@ -224,6 +239,7 @@ class SteamGUI:
             else:
                 return lijst
 
+        # deze functie filteret producten op taal
         def producten_filteren_op_language(lijst, checkknop):
             geklikte_checkknop_highlighten(checkknop)
 
@@ -240,6 +256,7 @@ class SteamGUI:
 
         lijst_temp = []
 
+        # deze functie toont en sorteerd producten in een nette weergave
         def getoonde_producten_sorteren_en_filteren():
             lijst = lijst_sorteren_op_optie()
             lijst = producten_filteren_op_price(lijst)
@@ -251,16 +268,19 @@ class SteamGUI:
 
             inhoud_listbox_aanpassen(lijst)
 
+        # deze functie toont de producten
         def producten_tonen():
             producten_zoeken_op_naam()
             getoonde_producten_sorteren_en_filteren()
 
+        # deze functie highlight knop_menubalk_2 als deze word aangeklikt
         def geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen):
             for knop in knoppen:
                 knop.button.configure(foreground=lichtgrijs)
 
             geklikte_knop.button.configure(foreground="white")
 
+        # deze functie toont de applicatie pagina
         def applicatie_pagina_tonen(gekozen_pagina, paginas):
             for pagina in paginas:
                 pagina.forget()
@@ -268,6 +288,7 @@ class SteamGUI:
             gekozen_pagina.pack(fill=BOTH,
                                 expand=TRUE)
 
+        # deze functie toon het 'store' scherm
         def store_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
@@ -288,14 +309,17 @@ class SteamGUI:
 
             producten_tonen()
 
+       # deze functie toont het scherm voor de statistieken
         def stats_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
+        # deze functie toon het scherm voor de TI onderdelen
         def ti_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
+        # deze functie berekent het percentage games met genre (...) t.o.v. alle games
        def statistiek_kwalitatief():
             zoek_term = []
             for i in range(len(data)):
@@ -305,8 +329,9 @@ class SteamGUI:
             percentage = (len(zoek_term) / len(data)) * 100
 
             tekst_kwalitatief = "There are {} games with '{}' as genre. \nThat is {:<.1f}% of all {} games."
-            label_kwalitatief["text"] = tekst_kwalitatief.format(len(zoek_term), genre_entry.get(), percentage,
-                                                                   len(data))
+            label_kwalitatief["text"] = tekst_kwalitatief.format(len(zoek_term), genre_entry.get(), percentage, len(data))
+            
+        # deze functie berkent het gemiddelde aantal speeluren van games met verschillende ranges in prijs
         def statistiek_kwantitatief():
             range_gratis = []
             range_0_10 = []
