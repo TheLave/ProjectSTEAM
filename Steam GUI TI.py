@@ -1,8 +1,10 @@
 from tkinter import *
 import json
-import urllib.request
-import time
+import urllib.request, json
+from time import *
+from datetime import datetime
 from tkinter import messagebox
+import I2C_LCD_driver
 
 
 class DataBewerking:
@@ -306,12 +308,15 @@ class SteamGUI:
                                                                            'gestuurd naar de store')
                 store_scherm_tonen(knop_store, frame_store)
 
+            mylcd = I2C_LCD_driver.lcd()
             shift_clock_pin = 5
             latch_clock_pin = 6
             data_pin = 13
             servo = 25
             neo_clock_pin = 19
             neo_data_pin = 26
+            switch = 23
+            switch2 = 24
 
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(0)
@@ -321,6 +326,11 @@ class SteamGUI:
             GPIO.setup(servo, GPIO.OUT)
             GPIO.setup(neo_clock_pin, GPIO.OUT)
             GPIO.setup(neo_data_pin, GPIO.OUT)
+
+            textEntries = ['personaname', 'realname', 'personastate', 'lastlogoff', 'timecreated', 'steamid', 'loccountrycode']
+            textNameEntries = ['Nickname', 'Realname', 'Status', 'Last log off', 'Created on', 'Steam ID', 'Nationality']
+            personaStatusEntries = ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade', 'Looking to play']
+            str_pad = " " * 16
 
             # neopixels
             def apa102_send_bytes(clock_pin, data_pin, bytes):
@@ -432,9 +442,9 @@ class SteamGUI:
             #servo
             def pulse(pin, delay1, delay2):
                 GPIO.output(pin, GPIO.HIGH)
-                time.sleep(delay1)
+                sleep(delay1)
                 GPIO.output(pin, GPIO.LOW)
-                time.sleep(delay2)
+                sleep(delay2)
 
             def servo_pulse(pin_nr, position):
 
@@ -530,6 +540,57 @@ class SteamGUI:
                 GPIO.output(latch_clock_pin, GPIO.HIGH)
                 GPIO.output(latch_clock_pin, GPIO.LOW)
 
+            def start_display(steamid):
+                entryIndex = 0
+                pressed = False
+                with urllib.request.urlopen("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key"
+                                            f"=948437B690B388BBEFF1D07D68AB2553&steamids={steamid}") as url:
+                    rawData = json.loads(url.read().decode())
+                    if rawData["response"]["players"]:
+                        data = rawData["response"]["players"][0]
+                        print('Data read successful')
+                    else:
+                        print('Data read failed. Is the steamID correct?')
+                
+                mylcd.lcd_clear()
+                mylcd.lcd_display_string('Druk op de knop', 1)
+                mylcd.lcd_display_string('voor informatie', 2)
+
+                GPIO.setup( switch, GPIO.IN, pull_up_down=GPIO.PUD_DOWN )
+                GPIO.setup( switch2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN )
+                while True:
+                    if(GPIO.input(switch2)):
+                        if not pressed:
+                            mylcd.lcd_clear()
+                            mylcd.lcd_display_string('Steam GUI', 1)
+                            mylcd.lcd_display_string('SG23 Groep A', 2)
+                            break
+                    if( GPIO.input( switch ) ):
+                        if pressed == False:
+                            pressed = not pressed
+                            mylcd.lcd_clear()
+                            mylcd.lcd_display_string(textNameEntries[entryIndex], 1)
+                            steamDataEntry = data[textEntries[entryIndex]]
+                            if textEntries[entryIndex] == 'lastlogoff' or textEntries[entryIndex] == 'timecreated':
+                                steamDataEntry = datetime.utcfromtimestamp(steamDataEntry).strftime('%d-%m-%Y %H:%M')
+                            elif textEntries[entryIndex] == 'personastate':
+                                steamDataEntry = personaStatusEntries[steamDataEntry]
+                            if len(steamDataEntry) > 16:
+                                for i in range (0, len(steamDataEntry)):
+                                        lcd_text = steamDataEntry[i:(i+16)]
+                                        mylcd.lcd_display_string(lcd_text,2)
+                                        sleep(0.3)
+                                        mylcd.lcd_display_string(str_pad,2)
+                                mylcd.lcd_display_string(str(steamDataEntry), 2)
+                            else:
+                                mylcd.lcd_display_string(str(steamDataEntry), 2)
+                            entryIndex += 1
+                            if entryIndex > len(textEntries) - 1:
+                                entryIndex = 0
+                    else:
+                        pressed = False
+                    sleep( 0.1 )
+
             knop_servo = Button(frame_servo_neopixels,
                                 foreground=babyblauw,
                                 activeforeground="white",
@@ -557,13 +618,23 @@ class SteamGUI:
                                          width=8,
                                          text="start",
                                          font=("helvetica", 10, "bold"),
-                                         command=lambda: zet_lampjes_aan(steamid_box2.get(), appid_box.get()))
+                                         command=lambda: zet_lampjes_aan(steamid_box.get(), appid_box.get()))
+
+            knop_display = Button(frame_schermpje,
+                                         foreground=babyblauw,
+                                         activeforeground="white",
+                                         background=blauw2,
+                                         activebackground=lichtblauw,
+                                         width=8,
+                                         text="start",
+                                         font=("helvetica", 10, "bold"),
+                                         command=lambda: start_display(steamid_box.get()))
 
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
-            scherm_ti_conf(knop_servo, knop_neopixels, knop_schuifregister)
+            scherm_ti_conf(knop_servo, knop_neopixels, knop_schuifregister, knop_display)
 
-        def scherm_ti_conf(knop1, knop2, knop3):
+        def scherm_ti_conf(knop1, knop2, knop3, knop4):
 
             frame_servo_neopixels.pack(side=LEFT,
                                        padx=50,
@@ -596,14 +667,10 @@ class SteamGUI:
             header_2.pack(pady=5)
             header_3.pack(pady=5)
 
-            steamid_label.pack (side=TOP,
-                                pady=(55, 15))
-            steamid_box.pack   (side=TOP,
-                                pady=0)
 
             steamid_label2.pack(side=TOP,
                                 pady=(55, 15))
-            steamid_box2.pack  (side=TOP,
+            steamid_box.pack   (side=TOP,
                                 pady=0)
 
             appid_label.pack   (side=TOP,
@@ -611,31 +678,37 @@ class SteamGUI:
             appid_box.pack     (side=TOP,
                                 pady=0)
 
-            knop1.pack              (side=TOP,
+            knop1.pack              (side=BOTTOM,
                                      anchor=W,
-                                     pady=(30, 0),
+                                     pady=(20, 0),
                                      padx=(160, 0))
 
-            knop2.pack              (side=TOP,
+            knop2.pack              (side=BOTTOM,
                                      anchor=W,
-                                     pady=(5, 0),
+                                     pady=(55, 0),
                                      padx=(150, 0))
 
             knop3.pack              (side=BOTTOM,
                                      pady=20)
 
+            knop4.pack              (side=BOTTOM,
+                                     pady=20)
+
             uitleg_neopixels.pack(     side=LEFT,
                                        anchor=N,
                                        padx=(30, 0),
-                                       pady=(20, 0))
+                                       pady=(50, 0))
 
             uitleg_servo.pack  (       side=RIGHT,
                                        anchor=N,
                                        padx=(0, 10),
-                                       pady=(15, 0))
+                                       pady=(50, 0))
 
             uitleg_schuifregister.pack(side=TOP,
                                        pady=(30, 0))
+
+            uitleg_display.pack(     side=TOP,
+                                       pady=(60, 0))
 
         def knop_3_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
@@ -765,7 +838,6 @@ class SteamGUI:
         knop_store = KnopMenubalk2(frame_menubalk2.frame, "STORE", lambda: store_scherm_tonen(knop_store, frame_store))
         knop_stats = KnopMenubalk2(frame_menubalk2.frame, "STATS", lambda: knop_1_scherm_tonen(knop_stats, frame_stats))
         knop_ti = KnopMenubalk2(frame_menubalk2.frame, "RASPI", lambda: knop_2_scherm_tonen(knop_ti, frame_ti))
-        knop3 = KnopMenubalk2(frame_menubalk2.frame, "KNOP3", lambda: knop_3_scherm_tonen(knop3, frame_knop3))
 
     # Applicatie pagina's
         applicatie_paginas = []
@@ -839,19 +911,7 @@ class SteamGUI:
                                            fg='white')
 
         # knoppen, labels en entry's frame 2
-        steamid_box =                Entry(frame_servo_neopixels,
-                                           foreground="white",
-                                           background=blauw2,
-                                           width=30,
-                                           font=("helvetica", 14))
-
-        steamid_label =              Label(frame_servo_neopixels,
-                                           fg=blauw3,
-                                           background=donkerblauw,
-                                           font=("helvetica", 14),
-                                           text='voer hier het steamid van iemand in')
-
-        steamid_box2 =               Entry(frame_schuifregister,
+        steamid_box =               Entry(frame_schuifregister,
                                            foreground="white",
                                            background=blauw2,
                                            width=30,
@@ -902,6 +962,16 @@ class SteamGUI:
                                                 'Paars:  looking to play\n'
                                                 'Roze:   looking to trade\n')
 
+        uitleg_display =           Label(frame_schermpje,
+                                           fg=blauw3,
+                                           justify=LEFT,
+                                           background=donkerblauw,
+                                           font=("helvetica", 14),
+                                           text='Op het display komt Steam acount informatie.\n'
+                                                'Gebruik de knoppen om te navigeren:\n'
+                                                'Geel:   Volgende\n'
+                                                'Zwart:  Stop\n')
+
         uitleg_schuifregister =      Label(frame_schuifregister,
                                            fg=blauw3,
                                            background=donkerblauw,
@@ -910,14 +980,9 @@ class SteamGUI:
                                                 'van de achievements je voor het \n '
                                                 'gegeven spel hebt gehaald')
 
-        # Knop3 scherm
-        frame_knop3 = Frame(master=hoofdframe,
-                            background="yellow")
-
         applicatie_paginas.extend([frame_store,
                                    frame_stats,
-                                   frame_ti,
-                                   frame_knop3])
+                                   frame_ti,])
 
             # Widgets op Store pagina
                 # Zoekbalk
@@ -991,10 +1056,11 @@ class SteamGUI:
         listbox_producten = Listbox(master=frame_listbox_producten,
                                     foreground=lichtgrijs,
                                     background=donkerblauw,
+                                    selectforeground=lichtgrijs,
                                     selectbackground=navy,
                                     height=48,
                                     width=99,
-                                    font=("monaco", 12))
+                                    font=("courier", 12))
         listbox_producten.pack(side=LEFT)
 
         scroll_bar_y_listbox_producten = Scrollbar(master=frame_listbox_producten,
