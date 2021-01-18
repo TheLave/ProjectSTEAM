@@ -292,11 +292,7 @@ class SteamGUI:
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
-        def knop_2_scherm_tonen(geklikte_knop, gekozen_pagina):
-            geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
-            applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
-
-        def knop_3_scherm_tonen(geklikte_knop, gekozen_pagina):
+        def ti_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
@@ -486,8 +482,7 @@ class SteamGUI:
         knoppen_menubalk2 = []
         knop_store = KnopMenubalk2(frame_menubalk2.frame, "STORE", lambda: store_scherm_tonen(knop_store, frame_store))
         knop_stats = KnopMenubalk2(frame_menubalk2.frame, "STATS", lambda: stats_scherm_tonen(knop_stats, frame_stats))
-        knop2 = KnopMenubalk2(frame_menubalk2.frame, "KNOP2", lambda: knop_2_scherm_tonen(knop2, frame_knop2))
-        knop3 = KnopMenubalk2(frame_menubalk2.frame, "KNOP3", lambda: knop_3_scherm_tonen(knop3, frame_knop3))
+        knop_ti = KnopMenubalk2(frame_menubalk2.frame, "TI", lambda: ti_scherm_tonen(knop_ti, frame_ti))
 
         # Applicatie pagina's
         applicatie_paginas = []
@@ -567,18 +562,13 @@ class SteamGUI:
 
         statistiek_kwalitatief()
 
-        # Knop2 scherm
-        frame_knop2 = Frame(master=hoofdframe,
-                            background="blue")
-
-        # Knop3 scherm
-        frame_knop3 = Frame(master=hoofdframe,
-                            background="yellow")
+        # TI scherm
+        frame_ti = Frame(master=hoofdframe,
+                         background=blauw)
 
         applicatie_paginas.extend([frame_store,
                                    frame_stats,
-                                   frame_knop2,
-                                   frame_knop3])
+                                   frame_ti])
 
         # Widgets op Store pagina
         # Zoekbalk
