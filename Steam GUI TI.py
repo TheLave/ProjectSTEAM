@@ -4,10 +4,6 @@ import urllib.request, json
 from time import *
 from datetime import datetime
 from tkinter import messagebox
-try:
-	import I2C_LCD_driver
-except:
-	print('Display driver niet geinitieerd. Programma draait niet op een RPi.')
 
 
 class DataBewerking:
@@ -296,19 +292,22 @@ class SteamGUI:
 
             producten_tonen()
 
-        def knop_1_scherm_tonen(geklikte_knop, gekozen_pagina):
+        def stats_scherm_tonen(geklikte_knop, gekozen_pagina):
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
-        def knop_2_scherm_tonen(geklikte_knop, gekozen_pagina):
+        def raspi_scherm_tonen(geklikte_knop, gekozen_pagina):
+            geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
+            applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
-            try: import RPi.GPIO as GPIO
-
+            try:
+                import RPi.GPIO as GPIO
+                import I2C_LCD_driver
             except:
                 messagebox.showerror(title='Geen raspberry Pi', message='het lijkt erop dat u niet op een raspberry'
-                                                                           ' Pi bezig bent dus heeft dit tablad geen '
-                                                                           'functionaliteit voor u. U wordt terug'
-                                                                           'gestuurd naar de store')
+                                                                        ' Pi bezig bent dus heeft dit tablad geen '
+                                                                        'functionaliteit voor u. U wordt terug'
+                                                                        'gestuurd naar de store')
                 store_scherm_tonen(knop_store, frame_store)
 
             mylcd = I2C_LCD_driver.lcd()
@@ -330,21 +329,20 @@ class SteamGUI:
             GPIO.setup(neo_clock_pin, GPIO.OUT)
             GPIO.setup(neo_data_pin, GPIO.OUT)
 
-            textEntries = ['personaname', 'realname', 'personastate', 'lastlogoff', 'timecreated', 'steamid', 'loccountrycode']
-            textNameEntries = ['Nickname', 'Realname', 'Status', 'Last log off', 'Created on', 'Steam ID', 'Nationality']
-            personaStatusEntries = ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade', 'Looking to play']
+            textEntries = ['personaname', 'realname', 'personastate', 'lastlogoff', 'timecreated', 'steamid',
+                           'loccountrycode']
+            textNameEntries = ['Nickname', 'Realname', 'Status', 'Last log off', 'Created on', 'Steam ID',
+                               'Nationality']
+            personaStatusEntries = ['Offline', 'Online', 'Busy', 'Away', 'Snooze', 'Looking to trade',
+                                    'Looking to play']
             str_pad = " " * 16
 
             # neopixels
             def apa102_send_bytes(clock_pin, data_pin, bytes):
-
                 for byte in bytes:
-
                     for bits in byte:
-
                         if bits == 1:
                             GPIO.output(data_pin, GPIO.HIGH)
-
                         else:
                             GPIO.output(data_pin, GPIO.LOW)
 
@@ -359,26 +357,21 @@ class SteamGUI:
 
                 for byte in range(4):
                     byte = 8
-
                     for bits in range(byte):
                         apa102_send_bytes(clock_pin, data_pin, [byte0])
 
                 for i in range(8):
-
                     for bits in range(1):
                         apa102_send_bytes(clock_pin, data_pin, [byte1])
 
                     for value in color:
-
                         if value == 0:
                             for i in range(8):
                                 nummertjes.append(0)
 
                         while value >= 1:
-
                             if (value % 2) == 1:
                                 nummertjes.append(1)
-
                             else:
                                 nummertjes.append(0)
 
@@ -442,7 +435,7 @@ class SteamGUI:
                     print('Looking to play')
                     apa102(neo_clock_pin, neo_data_pin, kleuren['purple'])
 
-            #servo
+            # servo
             def pulse(pin, delay1, delay2):
                 GPIO.output(pin, GPIO.HIGH)
                 sleep(delay1)
@@ -456,7 +449,6 @@ class SteamGUI:
                 pulse(pin_nr, delay, 0.02)
 
             def check_state(steamid):
-
                 with urllib.request.urlopen("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key"
                                             f"=948437B690B388BBEFF1D07D68AB2553&steamids={steamid}") as url:
                     rawData = json.loads(url.read().decode())
@@ -478,12 +470,11 @@ class SteamGUI:
                     print('away midden')
                     servo_pulse(servo, 50)
 
-            #schuifregister
+            # schuifregister
             def check_achievments(data):
                 voltooid = 0
 
                 for achievements in data:
-
                     if achievements['achieved'] == 1:
                         voltooid += 1
 
@@ -497,7 +488,6 @@ class SteamGUI:
 
                 while aantalLampjes == -1:
                     # kijkt hoeveel lampjes er aan moeten (max 8)
-
                     if ((aantalAchievements / 8) * keer) < voltooid and keer < 8:
                         keer += 1
 
@@ -511,7 +501,6 @@ class SteamGUI:
                 return uit, aantalLampjes
 
             def zet_lampjes_aan(steamid2, appid):
-
                 with urllib.request.urlopen(
                         f"http://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid={appid}"
                         f"&key=248E21AEC4B9E0FA386209D67BF7AC5F&steamid={steamid2}") as url:
@@ -522,7 +511,6 @@ class SteamGUI:
                     print('Aantal achievements: ' + str(len(data)))
 
                 aantalAchievements = len(data)
-
                 uit, aantalLampjes = bereken_lampjes(aantalAchievements, data)
 
                 for i in range(8):
@@ -546,53 +534,60 @@ class SteamGUI:
             def start_display(steamid):
                 entryIndex = 0
                 pressed = False
+
                 with urllib.request.urlopen("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key"
                                             f"=948437B690B388BBEFF1D07D68AB2553&steamids={steamid}") as url:
                     rawData = json.loads(url.read().decode())
+
                     if rawData["response"]["players"]:
                         data = rawData["response"]["players"][0]
                         print('Data read successful')
                     else:
                         print('Data read failed. Is the steamID correct?')
-                
+
                 mylcd.lcd_clear()
                 mylcd.lcd_display_string('Druk op de knop', 1)
                 mylcd.lcd_display_string('voor informatie', 2)
 
-                GPIO.setup( switch, GPIO.IN, pull_up_down=GPIO.PUD_DOWN )
-                GPIO.setup( switch2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN )
+                GPIO.setup(switch, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+                GPIO.setup(switch2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
                 while True:
-                    if(GPIO.input(switch2)):
+                    if GPIO.input(switch2):
                         if not pressed:
                             mylcd.lcd_clear()
                             mylcd.lcd_display_string('Steam GUI', 1)
                             mylcd.lcd_display_string('SG23 Groep A', 2)
                             break
-                    if( GPIO.input( switch ) ):
+
+                    if GPIO.input(switch):
                         if pressed == False:
                             pressed = not pressed
                             mylcd.lcd_clear()
                             mylcd.lcd_display_string(textNameEntries[entryIndex], 1)
                             steamDataEntry = data[textEntries[entryIndex]]
+
                             if textEntries[entryIndex] == 'lastlogoff' or textEntries[entryIndex] == 'timecreated':
                                 steamDataEntry = datetime.utcfromtimestamp(steamDataEntry).strftime('%d-%m-%Y %H:%M')
                             elif textEntries[entryIndex] == 'personastate':
                                 steamDataEntry = personaStatusEntries[steamDataEntry]
+
                             if len(steamDataEntry) > 16:
-                                for i in range (0, len(steamDataEntry)):
-                                        lcd_text = steamDataEntry[i:(i+16)]
-                                        mylcd.lcd_display_string(lcd_text,2)
-                                        sleep(0.3)
-                                        mylcd.lcd_display_string(str_pad,2)
+                                for i in range(0, len(steamDataEntry)):
+                                    lcd_text = steamDataEntry[i:(i + 16)]
+                                    mylcd.lcd_display_string(lcd_text, 2)
+                                    sleep(0.3)
+                                    mylcd.lcd_display_string(str_pad, 2)
                                 mylcd.lcd_display_string(str(steamDataEntry), 2)
                             else:
                                 mylcd.lcd_display_string(str(steamDataEntry), 2)
                             entryIndex += 1
+
                             if entryIndex > len(textEntries) - 1:
                                 entryIndex = 0
                     else:
                         pressed = False
-                    sleep( 0.1 )
+                    sleep(0.1)
 
             knop_servo = Button(frame_servo_neopixels,
                                 foreground=babyblauw,
@@ -601,7 +596,7 @@ class SteamGUI:
                                 activebackground=lichtblauw,
                                 width=8,
                                 text="start servo",
-                                font=("helvetica", 10, "bold"),
+                                font=("Helvetica", 10, "bold"),
                                 command=lambda: check_state(steamid_box.get()))
 
             knop_neopixels = Button(frame_servo_neopixels,
@@ -610,7 +605,7 @@ class SteamGUI:
                                     background=blauw2,
                                     activebackground=lichtblauw,
                                     text="start led strip",
-                                    font=("helvetica", 10, "bold"),
+                                    font=("Helvetica", 10, "bold"),
                                     command=lambda: check_personstate(steamid_box.get()))
 
             knop_schuifregister = Button(frame_schuifregister,
@@ -620,18 +615,18 @@ class SteamGUI:
                                          activebackground=lichtblauw,
                                          width=8,
                                          text="start",
-                                         font=("helvetica", 10, "bold"),
+                                         font=("Helvetica", 10, "bold"),
                                          command=lambda: zet_lampjes_aan(steamid_box.get(), appid_box.get()))
 
             knop_display = Button(frame_schermpje,
-                                         foreground=babyblauw,
-                                         activeforeground="white",
-                                         background=blauw2,
-                                         activebackground=lichtblauw,
-                                         width=8,
-                                         text="start",
-                                         font=("helvetica", 10, "bold"),
-                                         command=lambda: start_display(steamid_box.get()))
+                                  foreground=babyblauw,
+                                  activeforeground="white",
+                                  background=blauw2,
+                                  activebackground=lichtblauw,
+                                  width=8,
+                                  text="start",
+                                  font=("Helvetica", 10, "bold"),
+                                  command=lambda: start_display(steamid_box.get()))
 
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
@@ -644,14 +639,14 @@ class SteamGUI:
                                        pady=(70, 400))
             frame_servo_neopixels.pack_propagate(False)
 
-            frame_schermpje.pack      (side=RIGHT,
-                                       padx=50,
-                                       pady=(70, 400))
+            frame_schermpje.pack(side=RIGHT,
+                                 padx=50,
+                                 pady=(70, 400))
             frame_schermpje.pack_propagate(False)
 
-            frame_schuifregister.pack (side=TOP,
-                                       anchor=CENTER,
-                                       pady=20)
+            frame_schuifregister.pack(side=TOP,
+                                      anchor=CENTER,
+                                      pady=20)
             frame_schuifregister.pack_propagate(False)
 
             frame_header1.place(anchor=N,
@@ -670,52 +665,47 @@ class SteamGUI:
             header_2.pack(pady=5)
             header_3.pack(pady=5)
 
-
             steamid_label2.pack(side=TOP,
                                 pady=(55, 15))
-            steamid_box.pack   (side=TOP,
-                                pady=0)
+            steamid_box.pack(side=TOP,
+                             pady=0)
 
-            appid_label.pack   (side=TOP,
-                                pady=(25, 15))
-            appid_box.pack     (side=TOP,
-                                pady=0)
+            appid_label.pack(side=TOP,
+                             pady=(25, 15))
+            appid_box.pack(side=TOP,
+                           pady=0)
 
-            knop1.pack              (side=BOTTOM,
-                                     anchor=W,
-                                     pady=(20, 0),
-                                     padx=(160, 0))
+            knop1.pack(side=BOTTOM,
+                       anchor=W,
+                       pady=(20, 0),
+                       padx=(160, 0))
 
-            knop2.pack              (side=BOTTOM,
-                                     anchor=W,
-                                     pady=(55, 0),
-                                     padx=(150, 0))
+            knop2.pack(side=BOTTOM,
+                       anchor=W,
+                       pady=(55, 0),
+                       padx=(150, 0))
 
-            knop3.pack              (side=BOTTOM,
-                                     pady=20)
+            knop3.pack(side=BOTTOM,
+                       pady=20)
 
-            knop4.pack              (side=BOTTOM,
-                                     pady=20)
+            knop4.pack(side=BOTTOM,
+                       pady=20)
 
-            uitleg_neopixels.pack(     side=LEFT,
-                                       anchor=N,
-                                       padx=(30, 0),
-                                       pady=(50, 0))
+            uitleg_neopixels.pack(side=LEFT,
+                                  anchor=N,
+                                  padx=(30, 0),
+                                  pady=(50, 0))
 
-            uitleg_servo.pack  (       side=RIGHT,
-                                       anchor=N,
-                                       padx=(0, 10),
-                                       pady=(50, 0))
+            uitleg_servo.pack(side=RIGHT,
+                              anchor=N,
+                              padx=(0, 10),
+                              pady=(50, 0))
 
             uitleg_schuifregister.pack(side=TOP,
                                        pady=(30, 0))
 
-            uitleg_display.pack(     side=TOP,
-                                       pady=(60, 0))
-
-        def knop_3_scherm_tonen(geklikte_knop, gekozen_pagina):
-            geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
-            applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
+            uitleg_display.pack(side=TOP,
+                                pady=(60, 0))
 
         class FrameMenubalk:
             def __init__(self, master):
@@ -731,8 +721,9 @@ class SteamGUI:
                                      background=donkergrijs,
                                      activebackground=donkergrijs,
                                      borderwidth=0,
+                                     highlightthickness=0,
                                      text=text,
-                                     font=("helvetica", 12, "bold"),
+                                     font=("Helvetica", 12, "bold"),
                                      command=command)
                 self.button.pack(side=RIGHT,
                                  padx=15)
@@ -745,8 +736,9 @@ class SteamGUI:
                                      background=donkergrijs,
                                      activebackground=donkergrijs,
                                      borderwidth=0,
+                                     highlightthickness=0,
                                      text=text,
-                                     font=("helvetica", 18),
+                                     font=("Helvetica", 18),
                                      command=command)
                 self.button.pack(side=LEFT,
                                  padx=10,
@@ -768,7 +760,7 @@ class SteamGUI:
                                    background=background,
                                    width=30,
                                    text=text,
-                                   font=("helvetica", 10),
+                                   font=("Helvetica", 10),
                                    anchor=anchor)
                 self.label.pack(pady=pady)
 
@@ -798,15 +790,16 @@ class SteamGUI:
                                                activeforeground=blauw3,
                                                foreground=blauw3,
                                                selectcolor=blauw,
+                                               highlightthickness=0,
                                                text=text,
-                                               font=("helvetica", 10),
+                                               font=("Helvetica", 10),
                                                variable=self.var,
                                                command=command,
                                                anchor=W)
                 self.checkbutton.pack(padx=(10, 0))
                 filter_tags.append(self)
 
-# Kleurencodes
+        # Kleurencodes
         navy = "#101822"
         donkerblauw = "#16202d"
         blauw = "#1b2837"
@@ -818,18 +811,18 @@ class SteamGUI:
         lichtgrijs = "#a1aab8"
         grijs = "#323e4b"
 
-# Configs
+        # Configs
         master.title("Steam")
         master.bind("<Escape>", applicatie_afsluiten)
         master.attributes("-fullscreen", True)
 
-# Widgets
+        # Widgets
         hoofdframe = Frame(master=master,
                            background=blauw)
         hoofdframe.pack(fill=BOTH,
                         expand=TRUE)
 
-    # Menubalken
+        # Menubalken
         # Menubalk1
         frame_menubalk1 = FrameMenubalk(hoofdframe)
         knop_applicatie_sluiten = KnopMenubalk1(frame_menubalk1.frame, "x", master.destroy)
@@ -839,10 +832,10 @@ class SteamGUI:
         frame_menubalk2 = FrameMenubalk(hoofdframe)
         knoppen_menubalk2 = []
         knop_store = KnopMenubalk2(frame_menubalk2.frame, "STORE", lambda: store_scherm_tonen(knop_store, frame_store))
-        knop_stats = KnopMenubalk2(frame_menubalk2.frame, "STATS", lambda: knop_1_scherm_tonen(knop_stats, frame_stats))
-        knop_ti = KnopMenubalk2(frame_menubalk2.frame, "RASPI", lambda: knop_2_scherm_tonen(knop_ti, frame_ti))
+        knop_stats = KnopMenubalk2(frame_menubalk2.frame, "STATS", lambda: stats_scherm_tonen(knop_stats, frame_stats))
+        knop_raspi = KnopMenubalk2(frame_menubalk2.frame, "RASPI", lambda: raspi_scherm_tonen(knop_raspi, frame_raspi))
 
-    # Applicatie pagina's
+        # Applicatie pagina's
         applicatie_paginas = []
 
         # Store scherm
@@ -858,137 +851,136 @@ class SteamGUI:
         frame_stats = Frame(master=hoofdframe,
                             background="green")
 
-        # Knop2 scherm
-        frame_ti = Frame(master=hoofdframe,
-                            background=blauw)
+        # Raspi scherm
+        frame_raspi = Frame(master=hoofdframe,
+                         background=blauw)
 
         # frame 1 servo en neopixels
-        frame_servo_neopixels =      Frame(frame_ti,
-                                           bg=donkerblauw,
-                                           height=400,
-                                           width=400)
+        frame_servo_neopixels = Frame(frame_raspi,
+                                      bg=donkerblauw,
+                                      height=400,
+                                      width=400)
 
-        frame_header1 =         LabelFrame(frame_servo_neopixels,
-                                           bg=navy,
-                                           height=40,
-                                           width=400)
+        frame_header1 = LabelFrame(frame_servo_neopixels,
+                                   bg=navy,
+                                   height=40,
+                                   width=400)
 
-        header_1 =                   Label(frame_header1,
-                                           text='online/offline en personastate',
-                                           bg=navy,
-                                           font=("helvetica", 14, "italic"),
-                                           fg='white')
+        header_1 = Label(frame_header1,
+                         text='online/offline en personastate',
+                         bg=navy,
+                         font=("Helvetica", 14, "italic"),
+                         fg='white')
 
         # frame 2 schuifregister
-        frame_schuifregister =       Frame(frame_ti,
-                                           bg=donkerblauw,
-                                           height=400,
-                                           width=400)
+        frame_schuifregister = Frame(frame_raspi,
+                                     bg=donkerblauw,
+                                     height=400,
+                                     width=400)
 
-        frame_header2 =         LabelFrame(frame_schuifregister,
-                                           bg=navy,
-                                           height=40,
-                                           width=400)
+        frame_header2 = LabelFrame(frame_schuifregister,
+                                   bg=navy,
+                                   height=40,
+                                   width=400)
 
-        header_2 =                   Label(frame_header2,
-                                           text='achievement progress',
-                                           bg=navy,
-                                           font=("helvetica", 14, "italic"),
-                                           fg='white')
+        header_2 = Label(frame_header2,
+                         text='achievement progress',
+                         bg=navy,
+                         font=("Helvetica", 14, "italic"),
+                         fg='white')
 
         # frame 3 schermpje en knop
-        frame_schermpje =            Frame(frame_ti,
-                                           bg=donkerblauw,
-                                           height=400,
-                                           width=400)
+        frame_schermpje = Frame(frame_raspi,
+                                bg=donkerblauw,
+                                height=400,
+                                width=400)
 
-        frame_header3 =         LabelFrame(frame_schermpje,
-                                           bg=navy,
-                                           height=40,
-                                           width=400)
+        frame_header3 = LabelFrame(frame_schermpje,
+                                   bg=navy,
+                                   height=40,
+                                   width=400)
 
-        header_3 =                   Label(frame_header3,
-                                           text='Steam profiel informatie',
-                                           bg=navy,
-                                           font=("helvetica", 14, "italic"),
-                                           fg='white')
+        header_3 = Label(frame_header3,
+                         text='Steam profiel informatie',
+                         bg=navy,
+                         font=("Helvetica", 14, "italic"),
+                         fg='white')
 
         # knoppen, labels en entry's frame 2
-        steamid_box =               Entry(frame_schuifregister,
-                                           foreground="white",
-                                           background=blauw2,
-                                           width=30,
-                                           font=("helvetica", 14))
+        steamid_box = Entry(frame_schuifregister,
+                            foreground="white",
+                            background=blauw2,
+                            width=30,
+                            font=("Helvetica", 14))
 
-        steamid_label2 =             Label(frame_schuifregister,
-                                           fg=blauw3,
-                                           background=donkerblauw,
-                                           font=("helvetica", 14),
-                                           text='voer hier het steamid van iemand in')
+        steamid_label2 = Label(frame_schuifregister,
+                               fg=blauw3,
+                               background=donkerblauw,
+                               font=("Helvetica", 14),
+                               text='voer hier het steamid van iemand in')
 
-        appid_box =                  Entry(frame_schuifregister,
-                                           foreground="white",
-                                           background=blauw2,
-                                           width=30,
-                                           font=("helvetica", 14))
+        appid_box = Entry(frame_schuifregister,
+                          foreground="white",
+                          background=blauw2,
+                          width=30,
+                          font=("Helvetica", 14))
 
-        appid_label =                Label(frame_schuifregister,
-                                           fg=blauw3,
-                                           background=donkerblauw,
-                                           font=("helvetica", 14),
-                                           text='voer hier het appid van een spel in')
+        appid_label = Label(frame_schuifregister,
+                            fg=blauw3,
+                            background=donkerblauw,
+                            font=("Helvetica", 14),
+                            text='voer hier het appid van een spel in')
 
+        uitleg_servo = Label(frame_servo_neopixels,
+                             fg=blauw3,
+                             background=donkerblauw,
+                             justify=LEFT,
+                             font=("Helvetica", 11),
+                             text='Het servo motortje geeft aan \n'
+                                  'of iemand online is of niet: \n'
+                                  'Links: offline \n'
+                                  'Rechts: online \n'
+                                  'Midden: away')
 
-        uitleg_servo =               Label(frame_servo_neopixels,
-                                           fg=blauw3,
-                                           background=donkerblauw,
-                                           justify=LEFT,
-                                           font=("helvetica", 11),
-                                           text='Het servo motortje geeft aan \n'
-                                                'of iemand online is of niet: \n'
-                                                'Links: offline \n'
-                                                'Rechts: online \n'
-                                                'Midden: away')
+        uitleg_neopixels = Label(frame_servo_neopixels,
+                                 fg=blauw3,
+                                 justify=LEFT,
+                                 background=donkerblauw,
+                                 font=("Helvetica", 11),
+                                 text='De led strip geeft de\n'
+                                      'personastate weer: \n'
+                                      'Rood:    offline\n'
+                                      'Oranje: away\n'
+                                      'Groen:  online\n'
+                                      'Geel:     busy\n'
+                                      'Blauw:  snooze\n'
+                                      'Paars:  looking to play\n'
+                                      'Roze:   looking to trade\n')
 
-        uitleg_neopixels =           Label(frame_servo_neopixels,
-                                           fg=blauw3,
-                                           justify=LEFT,
-                                           background=donkerblauw,
-                                           font=("helvetica", 11),
-                                           text='De led strip geeft de\n'
-                                                'personastate weer: \n'
-                                                'Rood:    offline\n'
-                                                'Oranje: away\n'
-                                                'Groen:  online\n'
-                                                'Geel:     busy\n'
-                                                'Blauw:  snooze\n'
-                                                'Paars:  looking to play\n'
-                                                'Roze:   looking to trade\n')
+        uitleg_display = Label(frame_schermpje,
+                               fg=blauw3,
+                               justify=LEFT,
+                               background=donkerblauw,
+                               font=("Helvetica", 14),
+                               text='Op het display komt Steam acount informatie.\n'
+                                    'Gebruik de knoppen om te navigeren:\n'
+                                    'Geel:   Volgende\n'
+                                    'Zwart:  Stop\n')
 
-        uitleg_display =           Label(frame_schermpje,
-                                           fg=blauw3,
-                                           justify=LEFT,
-                                           background=donkerblauw,
-                                           font=("helvetica", 14),
-                                           text='Op het display komt Steam acount informatie.\n'
-                                                'Gebruik de knoppen om te navigeren:\n'
-                                                'Geel:   Volgende\n'
-                                                'Zwart:  Stop\n')
-
-        uitleg_schuifregister =      Label(frame_schuifregister,
-                                           fg=blauw3,
-                                           background=donkerblauw,
-                                           font=("helvetica", 14),
-                                           text='De lampjes geven weer hoeveel procent \n '
-                                                'van de achievements je voor het \n '
-                                                'gegeven spel hebt gehaald')
+        uitleg_schuifregister = Label(frame_schuifregister,
+                                      fg=blauw3,
+                                      background=donkerblauw,
+                                      font=("Helvetica", 14),
+                                      text='De lampjes geven weer hoeveel procent \n '
+                                           'van de achievements je voor het \n '
+                                           'gegeven spel hebt gehaald')
 
         applicatie_paginas.extend([frame_store,
                                    frame_stats,
-                                   frame_ti,])
+                                   frame_raspi])
 
-            # Widgets op Store pagina
-                # Zoekbalk
+        # Widgets op Store pagina
+        # Zoekbalk
         frame_zoekbalk_producten = Frame(master=frame_store_producten,
                                          background=navy)
         frame_zoekbalk_producten.pack(padx=10,
@@ -998,7 +990,7 @@ class SteamGUI:
                                          foreground="white",
                                          background=blauw2,
                                          width=30,
-                                         font=("helvetica", 14))
+                                         font=("Helvetica", 14))
         entry_zoekbalk_producten.pack(side=LEFT,
                                       padx=7,
                                       pady=10)
@@ -1010,18 +1002,18 @@ class SteamGUI:
                                          activebackground=lichtblauw,
                                          width=8,
                                          text="Search",
-                                         font=("helvetica", 10, "bold"),
+                                         font=("Helvetica", 10, "bold"),
                                          command=producten_tonen)
         knop_zoekbalk_producten.pack(side=LEFT)
 
         master.bind("<Return>", lambda *args: producten_tonen())
 
-                # Sort by
+        # Sort by
         label_sort_by = Label(master=frame_zoekbalk_producten,
                               foreground=grijs,
                               background=navy,
                               text="Sort by",
-                              font=("helvetica", 10))
+                              font=("Helvetica", 10))
         label_sort_by.pack(side=LEFT,
                            padx=(335, 0))
 
@@ -1045,13 +1037,13 @@ class SteamGUI:
                                      activeforeground="white",
                                      background=blauw2,
                                      activebackground=lichtblauw,
-                                     font=("helvetica", 10, "bold"),
+                                     font=("Helvetica", 10, "bold"),
                                      width=21,
                                      highlightthickness=0)
         optionmenu_sort_by.pack(side=LEFT,
                                 padx=10)
 
-                # Listbox
+        # Listbox
         frame_listbox_producten = Frame(master=frame_store_producten,
                                         background=blauw)
         frame_listbox_producten.pack()
@@ -1073,57 +1065,82 @@ class SteamGUI:
 
         listbox_producten.configure(yscrollcommand=scroll_bar_y_listbox_producten.set)
 
-                # Filters
+        # Filters
         frame_store_filters = Frame(master=frame_store,
                                     background=blauw)
         frame_store_filters.pack(side=LEFT)
 
-                    # Scales
+        # Scales
         maximum_price = 60
 
         frame_store_filters_price = FrameFilter(frame_store_filters)
-        label_filter_narrow_by_price = LabelFilter(frame_store_filters_price.frame, "white", grijs, "Narrow by Price", W, 0)
-        scale_filter_price = ScaleStore(frame_store_filters_price.frame, maximum_price, lambda *args: getoonde_producten_sorteren_en_filteren())
+        label_filter_narrow_by_price = LabelFilter(frame_store_filters_price.frame, "white", grijs, "Narrow by Price",
+                                                   W, 0)
+        scale_filter_price = ScaleStore(frame_store_filters_price.frame, maximum_price,
+                                        lambda *args: getoonde_producten_sorteren_en_filteren())
         label_gefilterde_price = LabelFilter(frame_store_filters_price.frame, blauw3, blauw, "Any Price", CENTER, 10)
 
         frame_store_filters_age = FrameFilter(frame_store_filters)
         label_filter_narrow_by_age = LabelFilter(frame_store_filters_age.frame, "white", grijs, "Narrow by Age", W, 0)
-        scale_filter_age = ScaleStore(frame_store_filters_age.frame, 18, lambda *args: getoonde_producten_sorteren_en_filteren())
+        scale_filter_age = ScaleStore(frame_store_filters_age.frame, 18,
+                                      lambda *args: getoonde_producten_sorteren_en_filteren())
         label_gefilterde_age = LabelFilter(frame_store_filters_age.frame, blauw3, blauw, "Any Age", CENTER, 10)
 
-                    # Check buttons
+        # Check buttons
         frame_store_filters_tags = FrameFilter(frame_store_filters)
         label_filter_narrow_by_tag = LabelFilter(frame_store_filters_tags.frame, "white", grijs, "Narrow by Tag", W, 0)
 
         filter_tags = []
 
-                        # Popular tags
-        checkbutton_tags_singleplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Single-player", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_multiplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Multi-player", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_action = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Action", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_adventure = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Adventure", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_casual = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Casual", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_co_op = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Co-op", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_first_person = CheckKnopStoreOpties(frame_store_filters_tags.frame, "First-Person", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_fps = CheckKnopStoreOpties(frame_store_filters_tags.frame, "FPS", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_great_soundtrack = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Great Soundtrack", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_horror = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Horror", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_indie = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Indie", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_open_world = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Open World", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_racing = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Racing", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_rpg = CheckKnopStoreOpties(frame_store_filters_tags.frame, "RPG", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_simulation = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Simulation", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_sports = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Sports", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_story_rich = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Story Rich", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_strategy = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Strategy", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_2d = CheckKnopStoreOpties(frame_store_filters_tags.frame, "2D", getoonde_producten_sorteren_en_filteren)
+        # Popular tags
+        checkbutton_tags_singleplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Single-player",
+                                                             getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_multiplayer = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Multi-player",
+                                                            getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_action = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Action",
+                                                       getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_adventure = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Adventure",
+                                                          getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_casual = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Casual",
+                                                       getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_co_op = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Co-op",
+                                                      getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_first_person = CheckKnopStoreOpties(frame_store_filters_tags.frame, "First-Person",
+                                                             getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_fps = CheckKnopStoreOpties(frame_store_filters_tags.frame, "FPS",
+                                                    getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_great_soundtrack = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Great Soundtrack",
+                                                                 getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_horror = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Horror",
+                                                       getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_indie = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Indie",
+                                                      getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_open_world = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Open World",
+                                                           getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_racing = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Racing",
+                                                       getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_rpg = CheckKnopStoreOpties(frame_store_filters_tags.frame, "RPG",
+                                                    getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_simulation = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Simulation",
+                                                           getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_sports = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Sports",
+                                                       getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_story_rich = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Story Rich",
+                                                           getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_strategy = CheckKnopStoreOpties(frame_store_filters_tags.frame, "Strategy",
+                                                         getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_2d = CheckKnopStoreOpties(frame_store_filters_tags.frame, "2D",
+                                                   getoonde_producten_sorteren_en_filteren)
 
-                        # Platforms
+        # Platforms
         frame_store_filters_platforms = FrameFilter(frame_store_filters)
         label_filter_platforms = LabelFilter(frame_store_filters_platforms.frame, "white", grijs, "Narrow by OS", W, 0)
-        checkbutton_tags_windows = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Windows", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_mac = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Mac", getoonde_producten_sorteren_en_filteren)
-        checkbutton_tags_linux = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Linux", getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_windows = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Windows",
+                                                        getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_mac = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Mac",
+                                                    getoonde_producten_sorteren_en_filteren)
+        checkbutton_tags_linux = CheckKnopStoreOpties(frame_store_filters_platforms.frame, "Linux",
+                                                      getoonde_producten_sorteren_en_filteren)
 
         checkbuttons = [checkbutton_tags_singleplayer,
                         checkbutton_tags_multiplayer,
@@ -1148,12 +1165,14 @@ class SteamGUI:
                         checkbutton_tags_mac,
                         checkbutton_tags_linux]
 
-                        # Languages
+        # Languages
         frame_store_filters_language = FrameFilter(frame_store_filters)
-        label_filter_language = LabelFilter(frame_store_filters_language.frame, "white", grijs, "Narrow by Language", W, 0)
-        checkbutton_tags_english = CheckKnopStoreOpties(frame_store_filters_language.frame, "English", getoonde_producten_sorteren_en_filteren)
+        label_filter_language = LabelFilter(frame_store_filters_language.frame, "white", grijs, "Narrow by Language", W,
+                                            0)
+        checkbutton_tags_english = CheckKnopStoreOpties(frame_store_filters_language.frame, "English",
+                                                        getoonde_producten_sorteren_en_filteren)
 
-    # Store tonen bij het opstarten van de applicatie.
+        # Store tonen bij het opstarten van de applicatie.
         store_scherm_tonen(knop_store, frame_store)
 
 
@@ -1168,19 +1187,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# To do:
-    # Sorteren                                                                                                                                           DONE
-        # Zorgen dat listbox bij default alle producten toont gesorteerd op rating                                                                       DONE
-        # - Dropdown menu for Sort by                                                                                                                    DONE
-        # - Scale for price                                                                                                                              DONE
-        # - Scale for required_age                                                                                                                       DONE
-        # - Check buttons for most common categories, genres, steamspy_tags,                                                                             DONE
-        # - Check buttons for platforms                                                                                                                  DONE
-        # - Check button for language "English"                                                                                                          DONE
-        # - Rating system                                                                                                                                DONE
-                # Functie schrijven om ratingspercentage van producten toe te voegen aan de data                                                         DONE
-                # ratingspercentage koppelen aan rating en toevoegen aan data(Overwhelmingly positive, Positive, Mixed, Mostly Negative, etc...          DONE
-                # Rating tonen bij zoeken van producten                                                                                                  DONE
-
-    # Statistiek
