@@ -309,6 +309,7 @@ class SteamGUI:
                                                                         'functionaliteit voor u. U wordt terug'
                                                                         'gestuurd naar de store')
                 store_scherm_tonen(knop_store, frame_store)
+                return
 
             mylcd = I2C_LCD_driver.lcd()
             shift_clock_pin = 5
@@ -1055,7 +1056,7 @@ class SteamGUI:
                                     selectbackground=navy,
                                     height=48,
                                     width=99,
-                                    font=("courier", 12))
+                                    font=("Courier", 12))
         listbox_producten.pack(side=LEFT)
 
         scroll_bar_y_listbox_producten = Scrollbar(master=frame_listbox_producten,
