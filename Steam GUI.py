@@ -374,8 +374,9 @@ class SteamGUI:
                                      background=donkergrijs,
                                      activebackground=donkergrijs,
                                      borderwidth=0,
+                                     highlightthickness=0,
                                      text=text,
-                                     font=("helvetica", 12, "bold"),
+                                     font=("Helvetica", 12, "bold"),
                                      command=command)
                 self.button.pack(side=RIGHT,
                                  padx=15)
@@ -388,8 +389,9 @@ class SteamGUI:
                                      background=donkergrijs,
                                      activebackground=donkergrijs,
                                      borderwidth=0,
+                                     highlightthickness=0,
                                      text=text,
-                                     font=("helvetica", 18),
+                                     font=("Helvetica", 18),
                                      command=command)
                 self.button.pack(side=LEFT,
                                  padx=10,
@@ -411,7 +413,7 @@ class SteamGUI:
                                    background=background,
                                    width=30,
                                    text=text,
-                                   font=("helvetica", 10),
+                                   font=("Helvetica", 10),
                                    anchor=anchor)
                 self.label.pack(pady=pady)
 
@@ -441,8 +443,9 @@ class SteamGUI:
                                                activeforeground=blauw3,
                                                foreground=blauw3,
                                                selectcolor=blauw,
+                                               highlightthickness=0,
                                                text=text,
-                                               font=("helvetica", 10),
+                                               font=("Helvetica", 10),
                                                variable=self.var,
                                                command=command,
                                                anchor=W)
@@ -588,7 +591,7 @@ class SteamGUI:
                                          foreground="white",
                                          background=blauw2,
                                          width=30,
-                                         font=("helvetica", 14))
+                                         font=("Helvetica", 14))
         entry_zoekbalk_producten.pack(side=LEFT,
                                       padx=7,
                                       pady=10)
@@ -600,7 +603,7 @@ class SteamGUI:
                                          activebackground=lichtblauw,
                                          width=8,
                                          text="Search",
-                                         font=("helvetica", 10, "bold"),
+                                         font=("Helvetica", 10, "bold"),
                                          command=producten_tonen)
         knop_zoekbalk_producten.pack(side=LEFT)
 
@@ -611,7 +614,7 @@ class SteamGUI:
                               foreground=grijs,
                               background=navy,
                               text="Sort by",
-                              font=("helvetica", 10))
+                              font=("Helvetica", 10))
         label_sort_by.pack(side=LEFT,
                            padx=(335, 0))
 
@@ -635,7 +638,7 @@ class SteamGUI:
                                      activeforeground="white",
                                      background=blauw2,
                                      activebackground=lichtblauw,
-                                     font=("helvetica", 10, "bold"),
+                                     font=("Helvetica", 10, "bold"),
                                      width=21,
                                      highlightthickness=0)
         optionmenu_sort_by.pack(side=LEFT,
@@ -649,10 +652,11 @@ class SteamGUI:
         listbox_producten = Listbox(master=frame_listbox_producten,
                                     foreground=lichtgrijs,
                                     background=donkerblauw,
+                                    selectforeground=lichtgrijs,
                                     selectbackground=navy,
                                     height=48,
                                     width=99,
-                                    font=("monaco", 12))
+                                    font=("Courier", 12))
         listbox_producten.pack(side=LEFT)
 
         scroll_bar_y_listbox_producten = Scrollbar(master=frame_listbox_producten,
