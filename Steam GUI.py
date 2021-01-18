@@ -296,7 +296,7 @@ class SteamGUI:
             geklikte_knop_menubalk2_highlighten(geklikte_knop, knoppen_menubalk2)
             applicatie_pagina_tonen(gekozen_pagina, applicatie_paginas)
 
-        def statistiek_kwantitatief():
+       def statistiek_kwalitatief():
             zoek_term = []
             for i in range(len(data)):
                 if genre_entry.get().lower() in data[i]['genres'].lower():
@@ -304,11 +304,10 @@ class SteamGUI:
 
             percentage = (len(zoek_term) / len(data)) * 100
 
-            tekst_kwantitatief = "Er zijn {} games met '{}' als genre. \nDat is {:<.1f}% van alle {} games."
-            label_kwantitatief["text"] = tekst_kwantitatief.format(len(zoek_term), genre_entry.get(), percentage,
+            tekst_kwalitatief = "There are {} games with '{}' as genre. \nThat is {:<.1f}% of all {} games."
+            label_kwalitatief["text"] = tekst_kwalitatief.format(len(zoek_term), genre_entry.get(), percentage,
                                                                    len(data))
-
-        def statistiek_kwalitatief():
+        def statistiek_kwantitatief():
             range_gratis = []
             range_0_10 = []
             range_10_30 = []
@@ -341,20 +340,20 @@ class SteamGUI:
                     range_boven_60.append(data[i]['average_playtime'])
                     gemiddelde_6 = sum(range_boven_60) / len(range_boven_60)
 
-            tekst_kwalitatief = (
-                f"Er zijn {len(range_gratis)} games in de prijs range: 'gratis'. "
-                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_1:<.0f}uur"
-                f"\nEr zijn {len(range_0_10)} games in de prijs range: €0.01<€10. "
-                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_2:<.0f}uur "
-                f"\nEr zijn {len(range_10_30)} games in de prijs range: €10<€30. "
-                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_3:<.0f}uur "
-                f"\nEr zijn {len(range_30_45)} games in de prijs range: €30<€45. "
-                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_4:<.0f}uur "
-                f"\nEr zijn {len(range_45_60)} games in de prijs range: €45<€60. "
-                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_5:<.0f}uur "
-                f"\nEr zijn {len(range_boven_60)} games in de prijs range: >€60. "
-                f"Deze hebben een gemiddelde speeltijd van: {gemiddelde_6:<.0f}uur ")
-            label_kwalitatief["text"] = tekst_kwalitatief
+            tekst_kwantitatief = (
+                f"There are {len(range_gratis)} games in the price range: 'free'. "
+                f"These have an average playtime of: {gemiddelde_1:<.0f}hourr"
+                f"\nThere are {len(range_0_10)} games in the price range: €0.01<€10. "
+                f"These have an average playtime of: {gemiddelde_2:<.0f}hour "
+                f"\nThere are {len(range_10_30)} games in the price range: €10<€30. "
+                f"These have an average playtime of: {gemiddelde_3:<.0f}hour "
+                f"\nThere are {len(range_30_45)} games in the price range: €30<€45. "
+                f"These have an average playtime of: {gemiddelde_4:<.0f}hour "
+                f"\nThere are {len(range_45_60)} games in the price range: €45<€60. "
+                f"These have an average playtime of: {gemiddelde_5:<.0f}hour "
+                f"\nThere are {len(range_boven_60)} games in the price range: >€60. "
+                f"These have an average playtime of: {gemiddelde_6:<.0f}hour ")
+            label_kwantitatief["text"] = tekst_kwantitatief
 
         class FrameMenubalk:
             def __init__(self, master):
@@ -508,51 +507,33 @@ class SteamGUI:
                              height=500,
                              width=800)
         totaal_frame.pack_propagate(False)
-        totaal_frame.pack(side=TOP, anchor=W)
+        totaal_frame.pack(anchor=CENTER)
 
         intro_label = Label(master=totaal_frame,
-                            text='Statistieken',
+                            text='Statistics',
                             bg=blauw,
                             fg='white',
-                            font=("Helvetica", 14, "bold"))
+                            font=("Helvetica", 28, "bold"))
         intro_label.pack(side=TOP, fill=X, pady=10)
 
+        kwalitatief_frame = Frame(master=totaal_frame,
+                                  bg=blauw)
+        kwalitatief_frame.pack(fill='both', expand=True, pady=5)
+
         genre_label = Label(master=totaal_frame,
-                            text='Van welk genre wil je het percentage games weten?: ',
+                            text='Off which genre would you like to know the percentage?: ',
                             bg=blauw,
                             foreground='white',
                             font=("Helvetica", 14, ""))
-
         genre_label.pack(pady=5)
 
         genre_entry = Entry(master=totaal_frame)
         genre_entry.pack(padx=10, pady=10)
 
         test_button = Button(master=totaal_frame,
-                             text='druk hier',
-                             command=statistiek_kwantitatief)
+                             text='search',
+                             command=statistiek_kwalitatief)
         test_button.pack(pady=10)
-
-        kwantitatief_frame = Frame(master=totaal_frame,
-                                   bg=blauw)
-        kwantitatief_frame.pack(fill='both', expand=True, pady=5)
-
-        label_kwantitatief = Label(master=totaal_frame,
-                                   bg=blauw,
-                                   fg='white',
-                                   font=("Helvetica", 10, "bold"))
-        label_kwantitatief.pack(pady=5)
-
-        kwalitatief_frame = Frame(master=totaal_frame,
-                                  bg=blauw)
-        kwalitatief_frame.pack(fill='both', expand=True, pady=5)
-
-        kwalitatief_info = Label(master=totaal_frame,
-                                 bg=blauw,
-                                 fg='white',
-                                 font=("Helvetica", 10, "bold"),
-                                 text="Vergelijkingen prijs met speeltijd: ")
-        kwalitatief_info.pack()
 
         label_kwalitatief = Label(master=totaal_frame,
                                   bg=blauw,
@@ -560,7 +541,24 @@ class SteamGUI:
                                   font=("Helvetica", 10, "bold"))
         label_kwalitatief.pack(pady=5)
 
-        statistiek_kwalitatief()
+        kwantitatief_frame = Frame(master=totaal_frame,
+                                  bg=blauw)
+        kwantitatief_frame.pack(fill='both', expand=True, pady=5)
+
+        kwantitatief_info = Label(master=totaal_frame,
+                                 bg=blauw,
+                                 fg='white',
+                                 font=("Helvetica", 10, "bold"),
+                                 text="Comparison price with average playtime: ")
+        kwantitatief_info.pack()
+
+        label_kwantitatief = Label(master=totaal_frame,
+                                  bg=blauw,
+                                  fg='white',
+                                  font=("Helvetica", 10, "bold"))
+        label_kwantitatief.pack(pady=5)
+
+        statistiek_kwantitatief()
 
         # TI scherm
         frame_ti = Frame(master=hoofdframe,
