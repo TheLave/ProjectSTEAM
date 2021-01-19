@@ -41,4 +41,7 @@ De gevonden producten zijn ook nog eens te filteren op prijs, leeftijd en versch
 - Op de "Stats" pagina krijgt de gebruiker te zien wat de gemiddelde speeltijd/gebruikerstijd is van een product in verschillende prijsbereik.
 Ook heeft de gebruiker de mogelijkheid om het percentage te zoeken van een genre ten opzichte van de totale aantal producten.
 
-- Op de "Raspi" pagina ...
+- Op de "Raspi" pagina kan de gebruiker een aantal TI onderdelen gebruiken als aansturing en weergave van de applicatie. Zo zijn de LED lampjes en de Servo te gebruiken als status indicators van een ingevoerd steamid en/of appid. Er is hier informatie over de onlinestatus en achievement progress beschikbaar. Het display en de twee knoppen zijn te gebruiken om van een ingevoerd steamid, informatie op te halen. Hier is informatie als; Username, echte naam, laatste uitlog, online status en land van herkomst.
+
+Via [STEAMID I/O](https://steamid.io/) is een steam account link in te voeren en kan de steamid (steamID64) opgevraagd worden.
+Via [SteamDB](https://steamdb.info/apps/) kan een game opgezocht worden en kan de appid opgevraagd worden.
