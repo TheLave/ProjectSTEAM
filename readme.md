@@ -7,18 +7,23 @@ Blok B
 ### Jeroen Baltjes
 Studentnummer: 1782230  
 GitHub Username: Lobohuargo822
+Meegewerkt aan: BIM sprint 1, AI sprint 2 (statistiek)
 ### Cong Hieu Michel Bui
 Studentnummer: 1795248  
 GitHub Username: Hijeu
+Meegewerkt aan: CSC sprint 1, AI sprint 2 (sorteren)
 ### Robin Kroesen
 Studentnummer: 1779750  
 GitHub Username: RobinKroesen
+Meegewerkt aan: AI sprint 1, BIM sprint 2
 ### Martijn Thiadens
 Studentnummer: 1763328  
 GitHub Username: TheLave
+Meegewerkt aan: AI sprint 1, TI sprint 2
 ### Koen van Veldhuisen
 Studentnummer: 1786495  
 GitHub Username: koen1508
+Meegewerkt aan: AI sprint 1, TI sprint 2
 
 ## Doel van dit project
 Het doel van het 'Project STEAM' is om gamers op het bekende platform [Steam](https://store.steampowered.com/) een grafische weergave aan te bieden van het gaming gedrag van zichzelf en hun vrienden & het zoeken van games te vereenvoudigen. Deze applicatie moet worden ondersteund door een netwerk waarbij gebruik wordt gemaakt van een [RaspberryPi](https://www.raspberrypi.org/).
